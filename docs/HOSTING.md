@@ -36,3 +36,13 @@ GitHub's default URL is sufficient for initial publication. After the entrant ch
 
 - https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages
 - https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+
+## Preferred live-AI deployment: one Azure app
+
+Host the interface and `/api/*` on the same HTTPS origin in Azure Container Apps; use the existing Azure model adapter. Render is optional, not required. This avoids adding cross-origin browser requests and keeps credentials server-side. The provided Dockerfile packages hosted mode only; it does not run Foundry Local or install its native SDK.
+
+Server changes are tested locally: configurable PORT/HOST, explicit HTTPS PUBLIC_ORIGIN, origin rejection, payload validation, private-file rejection and fallback behavior. AI requests have a per-process limit of 12 starts per minute and two concurrent requests. This is a prototype bound, not a distributed spending cap or authentication system. Multiple replicas multiply that limit; begin with one maximum replica. Azure inference still incurs model usage costs; hosting free allowances do not make inference free.
+
+Before deployment: confirm subscription, model access and quota; select a supported deployment; store AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY and AZURE_OPENAI_DEPLOYMENT as server-side secrets; set PUBLIC_ORIGIN to the actual HTTPS app address; set ingress to port 4180. Use a capped replica configuration and review billing separately. Budget alerts notify; they do not stop charges. Do not create paid resources on the assumption that trial credit is available.
+
+Cloud deployment, container execution and live Azure inference have not yet been verified. The local HTTP integration test runs without credentials. After deployment, test from another browser/account: health, actual generated story, source references, provider failure, replay and keepsake downloads. Keep judge access working through the judging deadline. Do not present a configured health response as proof of successful model generation.
