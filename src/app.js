@@ -1,5 +1,6 @@
 import {demoEvents,match} from './events.js';
 import {at,story,clock,overlay,recap} from './stories.js';
+import {createMemory,memorySVG,memoryHTML,memoryLink,parseMomentLink} from './memories.js';
 const $=id=>document.getElementById(id);
 const prefs={mode:'fan',language:'en',team:'all',player:'all'};
 let index=0,timer=null,revision=0,controller=null,currentStory=null,ablation=false,aiAvailable=false;
@@ -63,4 +64,32 @@ $('ask-form').onsubmit=async event=>{
  finally{if(own===revision){$('ask').disabled=!aiAvailable;$('ask').textContent='↗';}}
 };
 render();
+let memories=[],selectedMemory=null;
+const memoryStorage='pro-vision-memories-v1';
+try{const saved=JSON.parse(localStorage.getItem(memoryStorage)||'[]');if(Array.isArray(saved))memories=saved.slice(0,6).filter(m=>m.version===1&&demoEvents.some(e=>e.id===m.eventId)&&typeof m.name==='string'&&typeof m.note==='string'&&typeof m.photo==='string').map(m=>createMemory(demoEvents.findIndex(e=>e.id===m.eventId),m.prefs,m,{interpretation:m.interpretation,evidence:m.evidence,provider:m.provider}));}catch{memories=[];}
+function showMemory(memory){
+ selectedMemory=memory;$('memory-art').innerHTML=memorySVG(memory);$('shirt-art').setAttribute('href','data:image/svg+xml;charset=utf-8,'+encodeURIComponent(memorySVG(memory)));
+ for(const key of ['memory-svg','memory-html','memory-link','memory-tap'])$(key).disabled=false;
+}
+function memoryGallery(){
+ $('memory-gallery').innerHTML=memories.map((m,i)=>`<button class="memory-saved" data-memory="${i}"><span>${escape(m.eventId)} · ${clock(m.clock)}</span><strong>${escape(m.name||'My moment')}</strong></button>`).join('');
+ $('memory-gallery').querySelectorAll('[data-memory]').forEach(b=>b.onclick=()=>showMemory(memories[Number(b.dataset.memory)]));
+}
+$('memory-create').onclick=async()=>{
+ const selected=index,preferences={...prefs},narrative=structuredClone(currentStory),name=$('memory-name').value,note=$('memory-note').value,file=$('memory-photo').files[0];$('memory-create').disabled=true;
+ try{
+  let photo='';if(file){if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1048576)throw new Error('Choose a PNG, JPEG or WebP photo up to 1 MB.');photo=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Photo could not be read.'));reader.readAsDataURL(file);});}
+  const memory=createMemory(selected,preferences,{name,note,photo},narrative);memories.unshift(memory);memories=memories.slice(0,6);showMemory(memory);memoryGallery();
+  try{localStorage.setItem(memoryStorage,JSON.stringify(memories));$('memory-status').textContent='Your moment is saved in this browser. Download a keepsake to keep a separate copy.';}catch{$('memory-status').textContent='Memory created, but browser storage is unavailable or full. Download your keepsake before closing the page.';}
+ }catch(error){$('memory-status').textContent=error.message;}finally{$('memory-create').disabled=false;}
+};
+$('memory-svg').onclick=()=>selectedMemory&&download(`pro-vision-memory-${selectedMemory.eventId}.svg`,memorySVG(selectedMemory),'image/svg+xml');
+$('memory-html').onclick=()=>selectedMemory&&download(`pro-vision-memory-${selectedMemory.eventId}.html`,memoryHTML(selectedMemory),'text/html');
+$('memory-link').onclick=async()=>{if(!selectedMemory)return;const link=memoryLink(selectedMemory,location.href);try{await navigator.clipboard.writeText(link);$('memory-status').textContent='Replay link copied. It contains no personal note or photo. It needs a publicly accessible app to work for other fans.';}catch{download('pro-vision-replay-link.txt',link,'text/plain');$('memory-status').textContent='Clipboard unavailable; replay link downloaded.';}};
+function followMemory(memory){stop();Object.assign(prefs,memory.prefs);for(const key of ['language','team','player'])$(key).value=prefs[key];document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===prefs.mode)));seek(demoEvents.findIndex(e=>e.id===memory.eventId));$('pitch').scrollIntoView({behavior:'smooth',block:'center'});$('memory-status').textContent='Simulated tag opened the saved match moment. No physical tag was scanned.';}
+$('memory-tap').onclick=()=>selectedMemory&&followMemory(selectedMemory);
+$('memory-clear').onclick=()=>{memories=[];selectedMemory=null;memoryGallery();try{localStorage.removeItem(memoryStorage);}catch{}$('memory-art').innerHTML='<p>Select a moment and create your first keepsake.</p>';$('shirt-art').removeAttribute('href');for(const key of ['memory-svg','memory-html','memory-link','memory-tap'])$(key).disabled=true;$('memory-status').textContent='Saved memories cleared from this browser. Previously downloaded files are unchanged.';};
+memoryGallery();if(memories[0])showMemory(memories[0]);
+function restoreMoment(){const linked=parseMomentLink(location.hash);if(!linked)return;Object.assign(prefs,linked.prefs);for(const key of ['language','team','player'])$(key).value=prefs[key];document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===prefs.mode)));seek(linked.index);}
+restoreMoment();window.addEventListener('hashchange',restoreMoment);
 fetch(new URL('./api/health',document.baseURI)).then(r=>r.ok?r.json():null).then(data=>{aiAvailable=data?.ai===true;$('ask').disabled=!aiAvailable;if(aiAvailable)$('notice').textContent='Microsoft AI is configured. Ask about this moment. Generation and validation are measured per request.';}).catch(()=>{});

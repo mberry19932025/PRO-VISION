@@ -57,3 +57,7 @@ The Sites preview serves static assets and computed explanations. **It cannot ru
 - [GitHub Pages and future domain plan](docs/HOSTING.md)
 
 Before submission: browser QA, broader human-reviewed AI evaluation, better latency/personalization, a full-match dataset, AI recap generation and judge-accessible AI. Do not claim a winning result, production readiness or a unique invention based on this prototype.
+
+### Fan memories
+
+“My match. My memory.” captures the selected event with its evidence, optional personal note/photo and a locally saved keepsake. Download a memory card or an interactive offline HTML version. A shirt mockup demonstrates how a simulated tag tap could reopen the replay. Real XtremeSignPost data, physical tags and clothing production are not connected. See [memory feature details](docs/MEMORIES.md). All 18 automated tests pass; browser interaction and visual review remain pending.

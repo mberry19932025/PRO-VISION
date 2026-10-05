@@ -18,7 +18,7 @@ if(process.argv.includes('--ai')){
  if(endpoint.protocol!=='https:'||!/(^|\.)(openai\.azure\.com|services\.ai\.azure\.com)$/.test(endpoint.hostname))throw new Error('Unsupported Azure endpoint');
  provider='azure';generate=async messages=>{const r=await fetch(endpoint.origin+'/openai/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json','api-key':process.env.AZURE_OPENAI_API_KEY},body:JSON.stringify({model:process.env.AZURE_OPENAI_DEPLOYMENT,messages,max_tokens:220,temperature:.1}),signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error('Provider failed');return (await r.json()).choices?.[0]?.message?.content??'';};
 }
-const assets=new Map([['/','index.html'],['/style.css','style.css'],...['events.js','stories.js','app.js'].map(f=>['/src/'+f,'src/'+f])]);
+const assets=new Map([['/','index.html'],['/style.css','style.css'],...['events.js','stories.js','memories.js','app.js'].map(f=>['/src/'+f,'src/'+f])]);
 const server=http.createServer(async(req,res)=>{
  const json=(status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(data));};
  try{
