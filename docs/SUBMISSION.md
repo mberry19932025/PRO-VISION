@@ -19,7 +19,7 @@
 - [ ] Complete-match synthetic scenarios and grounded AI recap generation.
 - [ ] Meaningful observable agent decisions/tool use if added; do not relabel functions as agents.
 - [ ] Free judge access to functioning AI through the end of judging, via hosted app or supported test build.
-- [ ] Public GitHub repository, reproducible setup, licenses and test instructions.
+- [x] Public GitHub repository with reproducible setup, third-party notices and test instructions: https://github.com/mberry19932025/PRO-VISION.
 - [ ] Public demo video under two minutes showing actual functioning software.
 - [ ] English pitch stating Microsoft technologies actually used and tested.
 - [ ] Category supported by implementation. Foundry Local alone has not been confirmed by organizers as sufficient for the Foundry Project category.

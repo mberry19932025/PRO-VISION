@@ -45,7 +45,7 @@ Set server-side `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_D
 
 ## Hosted preview and judging
 
-The Sites preview serves static assets and computed explanations. **It cannot run the native model.** It is not a fully AI-powered hosted entry. Judge access to live AI, public GitHub publication and a recorded public video remain pending. `npm run build` packages the static preview. The Sites source repository does not replace the required public GitHub repository.
+The Sites preview serves static assets and computed explanations. **It cannot run the native model.** It is not a fully AI-powered hosted entry. Public source is available at https://github.com/mberry19932025/PRO-VISION. Judge access to live AI and a recorded public video remain pending. `npm run build` packages the static preview. The Sites source repository does not replace the required public GitHub repository.
 
 ## Evidence and next work
 
