@@ -1,0 +1,16 @@
+{
+  "name": "pro-vision",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "dev": "node --env-file-if-exists=.env server.mjs",
+    "dev:ai": "node --env-file-if-exists=.env server.mjs --ai",
+    "ai:setup": "node node_modules/foundry-local-sdk/script/install-native.cjs"
+  },
+  "devDependencies": {
+    "foundry-local-sdk": "2.1.0"
+  }
+}
