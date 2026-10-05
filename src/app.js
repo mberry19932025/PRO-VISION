@@ -58,9 +58,9 @@ $('download-recap').onclick=()=>download('pro-vision-recap.txt',$('recap-output'
 $('ask-form').onsubmit=async event=>{
  event.preventDefault();if(!aiAvailable)return;stop();controller?.abort();controller=new AbortController();const own=revision;
  $('ask').disabled=true;$('ask').textContent='…';$('notice').textContent='Generating an interpretation from the current evidence…';
- try{const response=await fetch('/api/story',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({index,prefs,question:$('question').value}),signal:controller.signal});if(!response.ok)throw new Error('Request failed');const data=await response.json();if(own!==revision)return;narrative(data.story);$('notice').textContent=data.notice;}
+ try{const response=await fetch(new URL('./api/story',document.baseURI),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({index,prefs,question:$('question').value}),signal:controller.signal});if(!response.ok)throw new Error('Request failed');const data=await response.json();if(own!==revision)return;narrative(data.story);$('notice').textContent=data.notice;}
  catch(error){if(own===revision&&error.name!=='AbortError')$('notice').textContent='AI request failed. The computed explanation remains available.';}
  finally{if(own===revision){$('ask').disabled=!aiAvailable;$('ask').textContent='↗';}}
 };
 render();
-fetch('/api/health').then(r=>r.ok?r.json():null).then(data=>{aiAvailable=data?.ai===true;$('ask').disabled=!aiAvailable;if(aiAvailable)$('notice').textContent='Microsoft AI is configured. Ask about this moment. Generation and validation are measured per request.';}).catch(()=>{});
+fetch(new URL('./api/health',document.baseURI)).then(r=>r.ok?r.json():null).then(data=>{aiAvailable=data?.ai===true;$('ask').disabled=!aiAvailable;if(aiAvailable)$('notice').textContent='Microsoft AI is configured. Ask about this moment. Generation and validation are measured per request.';}).catch(()=>{});

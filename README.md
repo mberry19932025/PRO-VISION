@@ -54,5 +54,6 @@ The Sites preview serves static assets and computed explanations. **It cannot ru
 - [Evaluation](docs/EVALUATION.md)
 - [Demo plan](docs/DEMO.md)
 - [Submission readiness](docs/SUBMISSION.md)
+- [GitHub Pages and future domain plan](docs/HOSTING.md)
 
 Before submission: browser QA, broader human-reviewed AI evaluation, better latency/personalization, a full-match dataset, AI recap generation and judge-accessible AI. Do not claim a winning result, production readiness or a unique invention based on this prototype.
