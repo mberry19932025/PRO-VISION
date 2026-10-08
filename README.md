@@ -61,3 +61,9 @@ Before submission: browser QA, broader human-reviewed AI evaluation, better late
 ### Fan memories
 
 “My match. My memory.” captures the selected event with its evidence, optional personal note/photo and a locally saved keepsake. Download a memory card or an interactive offline HTML version. A shirt mockup demonstrates how a simulated tag tap could reopen the replay. Real XtremeSignPost data, physical tags and clothing production are not connected. See [memory feature details](docs/MEMORIES.md). All 18 automated tests pass; browser interaction and visual review remain pending.
+
+### Preview without a server
+
+Run `npm run build:offline`, then open `dist/PRO-VISION Preview.html` directly in a browser. It embeds the app, styles and synthetic data in one file and uses computed explanations. No Terminal server, module imports or network fetch is needed for startup. A startup banner reports success or an error. The backend and local-AI entry point remain available separately.
+
+All 20 automated checks pass, including offline startup and replay/recap/memory interactions against the actual page IDs in a simulated DOM. This does not replace real browser visual and download testing. No browser automation connection was available for that review.
