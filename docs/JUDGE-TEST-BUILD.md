@@ -22,7 +22,7 @@ The app prints its address after the model loads and opens the browser on macOS.
 
 Select the progressive pass. Ask why it may matter and watch the response arrive. The provider label must say MICROSOFT FOUNDRY LOCAL · AI for a generated answer. COMPUTED EXPLANATION means fallback, not successful generation. Basic output checks do not establish factual truth. Inspect the source IDs, compare fan/analyst modes, then ask about speed: the app should state that speed is absent from its dataset without fabricating a measurement.
 
-The replay and calculations stay responsive independently of the model. Slow generation and rejected output return a computed explanation; do not present that fallback as AI. Concurrent native generation is blocked while a previous request remains active internally.
+The replay and calculations stay responsive independently of the model. Slow generation and rejected output return a computed explanation; do not present that fallback as AI. Local inference now runs in a separate worker. A stalled generation is killed after its parent-side deadline; a later request reloads the model. Repeated identical accepted answers may be reused from a clearly labeled in-memory cache.
 
 ## Verify personalization and memories
 

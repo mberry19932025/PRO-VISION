@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-Twenty automated checks cover authored-event statistics, pressure windows, no future facts, duplicate/late/malformed data, cloning, audience differences, evidence removal at a fixed cursor, recap preferences, translations, overlay provenance, narrative references, retry/fallback, response deadlines, unsupported questions and the broadcast lens. These verify important invariants but do not establish real-world accuracy.
+Twenty-six automated checks cover authored-event statistics, pressure windows, no future facts, duplicate/late/malformed data, cloning, audience differences, evidence removal at a fixed cursor, recap preferences, translations, overlay provenance, narrative references, retry/fallback, response deadlines, unsupported questions and the broadcast lens. These verify important invariants but do not establish real-world accuracy.
 
 HTML/CSS/JS are packaged without external assets. Backend HTTP checks returned 200 for the page and reported the loaded Microsoft model. Browser automation is unavailable in this session, so visuals, interactions and downloads have not been independently verified in a browser.
 
@@ -53,8 +53,18 @@ Run `node scripts/measure-ai.mjs` against a running local AI backend to repeat t
 
 `evaluation/live-compact-prompt.json`: fan pass 6.18 s with an accepted AI answer; analyst pass 23.55 s with computed fallback; unsupported speed 0.005 s with no model call. Fan wording (“could be crucial”) is tentative but generic and overemphasizes importance. It is not proof of football expertise.
 
-The final implementation uses the compact grounded rewriting task for fan/broadcast while restoring the previously tested analyst prompt. Fan rewriting starts from the computed explanation and bounded source IDs; it does not autonomously discover tactics. Retain lexical guards and human review requirements. Broadcast, Spanish, varied moments and adversarial inputs still need a broader live evaluation. All 21 automated checks pass.
+The final implementation uses the compact grounded rewriting task for fan/broadcast while restoring the previously tested analyst prompt. Fan rewriting starts from the computed explanation and bounded source IDs; it does not autonomously discover tactics. Retain lexical guards and human review requirements. Broadcast, Spanish, varied moments and adversarial inputs still need a broader live evaluation. All 26 automated checks pass.
 
 ## Final audience-specific comparison
 
 `evaluation/live-audience-prompts.json` preserves the final run: fan pass 5.86 s and analyst pass 11.82 s, both accepted on the first attempt; unsupported speed 0.005 s with no generation. This compares the same selected pass/questions against previous timing cases. It is a three-case spot check, not a benchmark. Successful basic validation is not semantic proof.
+
+## Worker isolation fix
+
+A follow-up live cache measurement returned the fan answer in 6.72 s and repeated it in 0.006 s, but its analyst request timed out. The same-process server later logged a 495,575 ms fallback, showing that its response timer could be delayed while native inference blocked or execution was suspended. No precise cause of the stall is asserted. The original same-process deadline was not a reliable bound.
+
+The revised server runs local inference in a child process and enforces a parent-side 25-second generation deadline. An automated test deliberately blocks the worker event loop, confirms the parent timer remains responsive, terminates the worker and checks that the next request recovers. This verifies the isolation mechanism, not all runtime conditions. Real-model behavior after this change is recorded separately when available.
+
+## Isolated-worker live cache check
+
+`evaluation/live-cache.json` records successful real Phi inference after worker isolation: fan first 5.746 s, identical fan repeat 0.005 s; analyst first 11.373 s, identical analyst repeat 0.005 s. First requests were misses with real inference; repeated requests were explicit cache hits without new inference. These four local requests are not a load benchmark or evidence of fresh generation in milliseconds. Broader semantic and multilingual reliability remain unverified.

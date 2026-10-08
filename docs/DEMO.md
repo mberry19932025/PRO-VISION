@@ -16,3 +16,5 @@ Record the actual local AI app. Do not use the static preview to imply live gene
 Use readable zoom, calm narration and microphone. No real footage, copyrighted soundtrack, club marks or sponsor logos. Show the actual AI label and result; do not edit in unperformed capabilities. If generation exceeds budget, simplify the sequence or improve performance. Keep the final file strictly below two minutes. Recap currently uses templates; say so if discussing its implementation.
 
 The new memory feature exports SVG and interactive HTML keepsakes. Show it only after browser verification. Do not call the simulated tag a real NFC integration or imply an XtremeSignPost partnership.
+
+Show “How this explanation was built” briefly alongside evidence. If repeating an AI question, keep the reuse label visible: the cached response is not a fresh generation. Parent-side worker isolation is a reliability improvement; do not claim all runtime failures are solved.

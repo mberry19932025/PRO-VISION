@@ -31,3 +31,11 @@ Foundry Local libraries and weights download separately and are excluded from so
 ## Exports
 
 Overlay schema 1.0 includes synthetic status, match ID, clock, duration, audience, language, preferences, observations, interpretation, IDs and provider. No broadcaster integration is claimed. Recaps use only replayed events and identify themselves as excerpt recaps. Exports contain no secrets.
+
+## Observable processing and response reuse
+
+The UI shows the actual ingestion window, computed patterns, explanation provider, render output and selected preferences. This is a processing record, not hidden reasoning or a claim of autonomous multi-agent orchestration. Source boundaries are checked separately from the truth of an interpretation.
+
+The server stores up to 64 accepted AI responses in memory for ten minutes. Keys include moment, audience, language, club, player and exact question. No failed answer is cached. Returned objects are cloned, cache hits explicitly disclose reuse, and original generation time remains visible. Cache data is lost on restart. Reusing an answer does not improve its factual accuracy.
+
+Native local inference runs in a separate child process. The parent imposes a 25-second generation deadline and kills a stalled worker; a subsequent generation can reload the model. Model startup has a separate deadline. The parent remains responsive during a blocked worker operation. This avoids relying on timers inside a process whose native model call may block its event loop.

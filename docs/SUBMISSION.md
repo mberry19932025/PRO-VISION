@@ -9,7 +9,7 @@
 - [x] Evidence replay, pressure sensitivity lab and overlay export.
 - [x] Recap and dataset downloads.
 - [x] Real local Microsoft generation, basic checks and fallback.
-- [x] 21 automated checks, including hosted HTTP integration checks.
+- [x] 26 automated checks, including hosted HTTP integration checks.
 - [x] Personal memory exports and clearly simulated clothing replay.
 - [x] Hosted server configuration and container recipe prepared; cloud execution remains unverified.
 

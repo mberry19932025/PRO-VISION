@@ -1,7 +1,7 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 export async function offlineHTML(){
  const exports={};const chunks=[];
- for(const name of ['events','stories','memories','app']){
+ for(const name of ['events','stories','memories','workflow','app']){
   let source=await readFile(new URL('../src/'+name+'.js',import.meta.url),'utf8');
   const names=[...source.matchAll(/^export (?:const|function|class) (\w+)/gm)].map(m=>m[1]);
   source=source.replace(/^import \{([^}]+)\} from '\.\/(\w+)\.js';\n/gm,(_,bindings,dependency)=>`const {${bindings}}=__pv_${dependency};\n`).replace(/^export /gm,'');

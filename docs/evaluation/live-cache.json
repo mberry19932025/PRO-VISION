@@ -1,0 +1,299 @@
+{
+  "recordedAt": "2026-10-08T22:40:41.451Z",
+  "results": [
+    {
+      "mode": "fan",
+      "repeat": false,
+      "totalMs": 5746,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "This moment could be crucial for advancing the ball towards scoring.",
+          "evidence": [
+            "M004",
+            "M002",
+            "M003"
+          ],
+          "provider": "foundry-local",
+          "metrics": null
+        },
+        "notice": "AI interpretation · 5.7s · references passed basic checks. Interpretations still need human review.",
+        "elapsedMs": 5692,
+        "trace": [
+          {
+            "attempt": 1,
+            "accepted": true,
+            "reason": null
+          }
+        ],
+        "audit": {
+          "clockSeconds": 128,
+          "evidenceBounded": true,
+          "evidenceIds": [
+            "M004",
+            "M002",
+            "M003"
+          ],
+          "stages": [
+            {
+              "stage": "Ingest",
+              "status": "complete",
+              "detail": "4 source records in the trailing window through 2:08."
+            },
+            {
+              "stage": "Interpret",
+              "status": "complete",
+              "detail": "progressive-pass · pressure-cluster"
+            },
+            {
+              "stage": "Explain",
+              "status": "ai",
+              "detail": "AI answer passed formatting and source checks; meaning is not independently verified."
+            },
+            {
+              "stage": "Render",
+              "status": "ready",
+              "detail": "Replay and eight-second lower-third export."
+            },
+            {
+              "stage": "Personalize",
+              "status": "complete",
+              "detail": "fan · en · all · all"
+            }
+          ],
+          "checks": [
+            {
+              "attempt": 1,
+              "accepted": true,
+              "reason": null
+            }
+          ],
+          "cacheStatus": "miss"
+        },
+        "cacheStatus": "miss"
+      }
+    },
+    {
+      "mode": "fan",
+      "repeat": true,
+      "totalMs": 5,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "This moment could be crucial for advancing the ball towards scoring.",
+          "evidence": [
+            "M004",
+            "M002",
+            "M003"
+          ],
+          "provider": "foundry-local",
+          "metrics": null
+        },
+        "notice": "Previously checked AI interpretation reused; no new inference. Original generation: 5.7s. Meaning still needs human review.",
+        "elapsedMs": 0,
+        "trace": [
+          {
+            "attempt": 1,
+            "accepted": true,
+            "reason": null
+          }
+        ],
+        "audit": {
+          "clockSeconds": 128,
+          "evidenceBounded": true,
+          "evidenceIds": [
+            "M004",
+            "M002",
+            "M003"
+          ],
+          "stages": [
+            {
+              "stage": "Ingest",
+              "status": "complete",
+              "detail": "4 source records in the trailing window through 2:08."
+            },
+            {
+              "stage": "Interpret",
+              "status": "complete",
+              "detail": "progressive-pass · pressure-cluster"
+            },
+            {
+              "stage": "Explain",
+              "status": "ai",
+              "detail": "Previously checked AI answer reused; no new inference."
+            },
+            {
+              "stage": "Render",
+              "status": "ready",
+              "detail": "Replay and eight-second lower-third export."
+            },
+            {
+              "stage": "Personalize",
+              "status": "complete",
+              "detail": "fan · en · all · all"
+            }
+          ],
+          "checks": [
+            {
+              "attempt": 1,
+              "accepted": true,
+              "reason": null
+            }
+          ],
+          "cacheStatus": "hit"
+        },
+        "cacheStatus": "hit",
+        "originalGenerationMs": 5692
+      }
+    },
+    {
+      "mode": "analyst",
+      "repeat": false,
+      "totalMs": 11373,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "Review the next recorded action to assess whether the pass helped sustain the attack, considering the lack of defensive position data.",
+          "evidence": [
+            "M004"
+          ],
+          "provider": "foundry-local",
+          "metrics": {
+            "advanceM": 21,
+            "passDistanceM": 21.6,
+            "pressureWindowSeconds": 20
+          }
+        },
+        "notice": "AI interpretation · 11.4s · references passed basic checks. Interpretations still need human review.",
+        "elapsedMs": 11367,
+        "trace": [
+          {
+            "attempt": 1,
+            "accepted": true,
+            "reason": null
+          }
+        ],
+        "audit": {
+          "clockSeconds": 128,
+          "evidenceBounded": true,
+          "evidenceIds": [
+            "M004"
+          ],
+          "stages": [
+            {
+              "stage": "Ingest",
+              "status": "complete",
+              "detail": "4 source records in the trailing window through 2:08."
+            },
+            {
+              "stage": "Interpret",
+              "status": "complete",
+              "detail": "progressive-pass · pressure-cluster"
+            },
+            {
+              "stage": "Explain",
+              "status": "ai",
+              "detail": "AI answer passed formatting and source checks; meaning is not independently verified."
+            },
+            {
+              "stage": "Render",
+              "status": "ready",
+              "detail": "Replay and eight-second lower-third export."
+            },
+            {
+              "stage": "Personalize",
+              "status": "complete",
+              "detail": "analyst · en · all · all"
+            }
+          ],
+          "checks": [
+            {
+              "attempt": 1,
+              "accepted": true,
+              "reason": null
+            }
+          ],
+          "cacheStatus": "miss"
+        },
+        "cacheStatus": "miss"
+      }
+    },
+    {
+      "mode": "analyst",
+      "repeat": true,
+      "totalMs": 5,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "Review the next recorded action to assess whether the pass helped sustain the attack, considering the lack of defensive position data.",
+          "evidence": [
+            "M004"
+          ],
+          "provider": "foundry-local",
+          "metrics": {
+            "advanceM": 21,
+            "passDistanceM": 21.6,
+            "pressureWindowSeconds": 20
+          }
+        },
+        "notice": "Previously checked AI interpretation reused; no new inference. Original generation: 11.4s. Meaning still needs human review.",
+        "elapsedMs": 0,
+        "trace": [
+          {
+            "attempt": 1,
+            "accepted": true,
+            "reason": null
+          }
+        ],
+        "audit": {
+          "clockSeconds": 128,
+          "evidenceBounded": true,
+          "evidenceIds": [
+            "M004"
+          ],
+          "stages": [
+            {
+              "stage": "Ingest",
+              "status": "complete",
+              "detail": "4 source records in the trailing window through 2:08."
+            },
+            {
+              "stage": "Interpret",
+              "status": "complete",
+              "detail": "progressive-pass · pressure-cluster"
+            },
+            {
+              "stage": "Explain",
+              "status": "ai",
+              "detail": "Previously checked AI answer reused; no new inference."
+            },
+            {
+              "stage": "Render",
+              "status": "ready",
+              "detail": "Replay and eight-second lower-third export."
+            },
+            {
+              "stage": "Personalize",
+              "status": "complete",
+              "detail": "analyst · en · all · all"
+            }
+          ],
+          "checks": [
+            {
+              "attempt": 1,
+              "accepted": true,
+              "reason": null
+            }
+          ],
+          "cacheStatus": "hit"
+        },
+        "cacheStatus": "hit",
+        "originalGenerationMs": 11367
+      }
+    }
+  ]
+}

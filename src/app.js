@@ -1,5 +1,6 @@
 import {demoEvents,match} from './events.js';
 import {at,story,clock,overlay,recap} from './stories.js';
+import {explanationAudit} from './workflow.js';
 import {createMemory,memorySVG,memoryHTML,memoryLink,parseMomentLink} from './memories.js';
 const $=id=>document.getElementById(id);
 const prefs={mode:'fan',language:'en',team:'all',player:'all'};
@@ -10,7 +11,9 @@ function visible(e){return (prefs.team==='all'||e.team===prefs.team)&&(prefs.pla
 function point(e,p){return e.team===match.home?p:[105-p[0],68-p[1]];}
 function stop(){clearInterval(timer);timer=null;$('play').textContent='▶ Play sequence';}
 function download(name,value,type='application/json'){const url=URL.createObjectURL(new Blob([value],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function narrative(s){
+function narrative(s,audit=explanationAudit(at(index),prefs,s)){
+ $('workflow').innerHTML=audit.stages.map(step=>`<li><strong>${escape(step.stage)}</strong><span>${escape(step.detail)}</span></li>`).join('');
+ $('source-check').textContent=audit.evidenceBounded?'Sources are within the current evidence window. This does not prove the interpretation.':'Source boundaries could not be confirmed.';
  currentStory=s;$('story-title').textContent=s.title;$('observed').textContent=s.observed;$('insight').textContent=s.interpretation;
  $('provider').textContent=s.provider==='foundry-local'?'MICROSOFT FOUNDRY LOCAL · AI':s.provider==='azure'?'MICROSOFT AZURE · AI':'COMPUTED EXPLANATION';
  $('detail-metrics').textContent=s.metrics?Object.entries(s.metrics).filter(([,v])=>v!==null).map(([k,v])=>`${{advanceM:'Forward gain (m)',passDistanceM:'Pass distance (m)',pressureWindowSeconds:'Pressure window (s)'}[k]}: ${v}`).join(' · '):'';
@@ -59,7 +62,7 @@ $('download-recap').onclick=()=>download('pro-vision-recap.txt',$('recap-output'
 $('ask-form').onsubmit=async event=>{
  event.preventDefault();if(!aiAvailable)return;stop();controller?.abort();controller=new AbortController();const own=revision;
  $('ask').disabled=true;$('ask').textContent='…';$('notice').textContent='Generating an interpretation from the current evidence…';
- try{const response=await fetch(new URL('./api/story',document.baseURI),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({index,prefs,question:$('question').value}),signal:controller.signal});if(!response.ok)throw new Error('Request failed');const data=await response.json();if(own!==revision)return;narrative(data.story);$('notice').textContent=data.notice;}
+ try{const response=await fetch(new URL('./api/story',document.baseURI),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({index,prefs,question:$('question').value}),signal:controller.signal});if(!response.ok)throw new Error('Request failed');const data=await response.json();if(own!==revision)return;narrative(data.story,data.audit);$('notice').textContent=data.notice;}
  catch(error){if(own===revision&&error.name!=='AbortError')$('notice').textContent='AI request failed. The computed explanation remains available.';}
  finally{if(own===revision){$('ask').disabled=!aiAvailable;$('ask').textContent='↗';}}
 };

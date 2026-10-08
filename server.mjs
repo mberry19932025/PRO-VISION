@@ -1,6 +1,6 @@
 import http from 'node:http';
-import {readFile,mkdir} from 'node:fs/promises';
-import {analyze,validateRequest} from './src/api.js';
+import {readFile} from 'node:fs/promises';
+import {createAnalyzer,validateRequest} from './src/api.js';
 const port=Number(process.env.PORT||4180),host=process.env.HOST||'127.0.0.1';
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid PORT');
 const publicOrigin=process.env.PUBLIC_ORIGIN?new URL(process.env.PUBLIC_ORIGIN).origin:null;
@@ -9,22 +9,16 @@ const allowedOrigins=new Set(publicOrigin?[publicOrigin]:[`http://localhost:${po
 let activeRequests=0;const calls=[];
 let generate=null,provider=null,modelId=null,close=async()=>{};
 if(process.argv.includes('--ai')){
- const {FoundryLocalManager}=await import('foundry-local-sdk');const root=new URL('.provision/',import.meta.url);await mkdir(root,{recursive:true});
- const path=n=>decodeURIComponent(new URL(n,root).pathname);
- const manager=FoundryLocalManager.create({appName:'pro-vision',appDataDir:path('data'),modelCacheDir:process.env.PROVISION_MODEL_CACHE||path('models'),logsDir:path('logs'),disableNonessentialTelemetry:true});
- try{
-  const model=await manager.catalog.getModel(process.env.PROVISION_LOCAL_MODEL||'phi-3.5-mini');
-  if(!model.isCached){console.log('Downloading Microsoft model…');let last=-1;await model.download(p=>{const step=Math.floor(p/10)*10;if(step>last){last=step;console.log(step+'%');}});}
-  await model.load();const client=model.createChatClient();client.settings.maxTokens=150;client.settings.temperature=.1;
-  let busy=false;generate=async messages=>{if(busy)throw new Error('Busy');busy=true;try{return (await client.completeChat(messages)).choices?.[0]?.message?.content??'';}finally{busy=false;}};
-  provider='foundry-local';modelId=model.id;close=async()=>{client.dispose();await model.unload();manager.dispose();};console.log('Microsoft model loaded:',model.id);
- }catch(error){manager.dispose();throw error;}
+ const {createLocalGenerator}=await import('./src/local-generator.mjs');
+ const local=await createLocalGenerator();generate=local.generate;close=local.close;provider='foundry-local';modelId=local.modelId;
+ console.log('Microsoft model loaded:',modelId);
 }else if(process.env.AZURE_OPENAI_ENDPOINT&&process.env.AZURE_OPENAI_API_KEY&&process.env.AZURE_OPENAI_DEPLOYMENT){
  const endpoint=new URL(process.env.AZURE_OPENAI_ENDPOINT);
  if(endpoint.protocol!=='https:'||!/(^|\.)(openai\.azure\.com|services\.ai\.azure\.com)$/.test(endpoint.hostname))throw new Error('Unsupported Azure endpoint');
  provider='azure';generate=async messages=>{const r=await fetch(endpoint.origin+'/openai/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json','api-key':process.env.AZURE_OPENAI_API_KEY},body:JSON.stringify({model:process.env.AZURE_OPENAI_DEPLOYMENT,messages,max_tokens:220,temperature:.1}),signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error('Provider failed');return (await r.json()).choices?.[0]?.message?.content??'';};
 }
-const assets=new Map([['/','index.html'],['/style.css','style.css'],...['events.js','stories.js','memories.js','app.js'].map(f=>['/src/'+f,'src/'+f])]);
+const analyzeRequest=createAnalyzer(generate,provider);
+const assets=new Map([['/','index.html'],['/style.css','style.css'],...['events.js','stories.js','memories.js','workflow.js','app.js'].map(f=>['/src/'+f,'src/'+f])]);
 const server=http.createServer(async(req,res)=>{
  const json=(status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(data));};
  try{
@@ -35,7 +29,7 @@ const server=http.createServer(async(req,res)=>{
    let length=0;const chunks=[];for await(const chunk of req){length+=chunk.length;if(length>4096){json(413,{error:'Request too large'});return;}chunks.push(chunk);}
    let data;try{data=JSON.parse(Buffer.concat(chunks).toString());validateRequest(data);}catch{json(400,{error:'Invalid request'});return;}
    if(generate){const now=Date.now();while(calls.length&&calls[0]<now-60000)calls.shift();if(activeRequests>=2||calls.length>=12){res.setHeader('retry-after','60');json(429,{error:'AI is busy; try again shortly'});return;}calls.push(now);}
-   activeRequests++;const started=performance.now();try{const result=await analyze(data,generate,provider);console.log(JSON.stringify({type:'story-response',eventIndex:data.index,mode:data.prefs.mode,language:data.prefs.language,provider:result.story.provider,elapsedMs:Math.round(performance.now()-started),attempts:result.trace?.length??0}));json(200,result);}finally{activeRequests--;}return;
+   activeRequests++;const started=performance.now();try{const result=await analyzeRequest(data);console.log(JSON.stringify({type:'story-response',eventIndex:data.index,mode:data.prefs.mode,language:data.prefs.language,provider:result.story.provider,elapsedMs:Math.round(performance.now()-started),attempts:result.cacheStatus==='hit'?0:result.trace?.length??0,cacheStatus:result.cacheStatus}));json(200,result);}finally{activeRequests--;}return;
   }
   if(req.method!=='GET'||!assets.has(pathname)){json(404,{error:'Not found'});return;}
   const file=assets.get(pathname);const type=file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html';
