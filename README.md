@@ -30,7 +30,7 @@ Open `http://localhost:4180`. Play uses actual excerpt-clock intervals; key-mome
 ```sh
 npm ci --ignore-scripts
 npm run ai:setup
-npm run dev:ai
+npm run preview:ai
 ```
 
 First launch downloads the model (approximately 2.2 GB for the tested GPU variant) into ignored `.provision/models`. Tested on an Apple Silicon Mac with 8 GB RAM; other platforms remain unverified. The native installer downloads Microsoft runtime libraries. Inference runs on-device without an Azure subscription or paid cloud inference.
@@ -41,7 +41,7 @@ The pinned SDK supports the deprecated ChatClient API; a later migration should 
 
 ## Optional Azure adapter
 
-Set server-side `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT` in ignored `.env`, then run `npm run dev`. Requires an HTTPS Azure OpenAI or AI Services resource. This adapter has not been tested against a real Azure resource in this entry. Never put keys in browser assets, exports or submission materials. No Azure resources have been created.
+Set server-side `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT` in ignored `.env`, then run `npm run dev`. Requires an HTTPS Azure OpenAI or AI Services resource. This adapter has not been tested against a real Azure resource in this entry. Never put keys in browser assets, exports or submission materials. The user created a Foundry project, but the attempted cloud model deployment was blocked by quota; cloud inference remains unverified.
 
 ## Hosted preview and judging
 
@@ -67,3 +67,5 @@ Before submission: browser QA, broader human-reviewed AI evaluation, better late
 Run `npm run build:offline`, then open `dist/PRO-VISION Preview.html` directly in a browser. It embeds the app, styles and synthetic data in one file and uses computed explanations. No Terminal server, module imports or network fetch is needed for startup. A startup banner reports success or an error. The backend and local-AI entry point remain available separately.
 
 All 20 automated checks pass, including offline startup and replay/recap/memory interactions against the actual page IDs in a simulated DOM. This does not replace real browser visual and download testing. No browser automation connection was available for that review.
+
+See [judge test-build instructions](docs/JUDGE-TEST-BUILD.md) for the proposed local installation route and its current limitations.

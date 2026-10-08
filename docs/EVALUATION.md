@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-Fourteen checks cover authored-event statistics, pressure windows, no future facts, duplicate/late/malformed data, cloning, audience differences, evidence removal at a fixed cursor, recap preferences, translations, overlay provenance, narrative references, retry/fallback, response deadlines, unsupported questions and the broadcast lens. These verify important invariants but do not establish real-world accuracy.
+Twenty automated checks cover authored-event statistics, pressure windows, no future facts, duplicate/late/malformed data, cloning, audience differences, evidence removal at a fixed cursor, recap preferences, translations, overlay provenance, narrative references, retry/fallback, response deadlines, unsupported questions and the broadcast lens. These verify important invariants but do not establish real-world accuracy.
 
 HTML/CSS/JS are packaged without external assets. Backend HTTP checks returned 200 for the page and reported the loaded Microsoft model. Browser automation is unavailable in this session, so visuals, interactions and downloads have not been independently verified in a browser.
 
@@ -25,7 +25,7 @@ The accepted outputs are not scored as 100% accurate. They passed basic formatti
 
 Human review found three accepted outputs insufficiently grounded: the fan claimed distance between opponents and the goal, the adversarial response described creating space, and the speed answer suggested a significant pace without speed data. These are failures of the then-current checks, not successful explanations. Preserve the raw historical report.
 
-Final changes reject those wording patterns and route known unsupported speed/xG/off-ball/intent questions to a computed limitation without calling the model. Automated checks exercise these cases. No full live rerun after guard changes has been performed. Lexical guards are not complete semantic validation; the local model is not yet a strong competition narrative engine.
+Final changes reject those wording patterns and route known unsupported speed/xG/off-ball/intent questions to a computed limitation without calling the model. Automated checks exercise these cases. A focused three-case live rerun is documented below; it is not a full multilingual or adversarial benchmark. Lexical guards are not complete semantic validation; the local model is not yet a strong competition narrative engine.
 
 ## Performance and operational limits
 
@@ -36,3 +36,9 @@ Graphics/statistics are computed immediately and remain independent of model lat
 ## Remaining evidence needed
 
 Broader authored scenarios, full-match fixtures, independent football review, real Spanish review, repeated latency measurements, task-specific unsupported-claim checks, browser UX tests and judge-accessible AI. Also test a supported cloud model only after an endpoint and deployment are available; the Azure adapter is currently unverified live.
+
+## Focused final-guard rerun
+
+`evaluation/live-final-guards.json` records actual on-device Microsoft Phi calls after the guard changes. The fan pass request fell back after invalid JSON and an unsupported movement assertion (28.1 s). The analyst pass returned a generated recommendation to review the next recorded action while acknowledging missing defensive positions (13.1 s, one attempt). The unsupported speed question returned a computed data limitation in 0 ms without a model call.
+
+Human assessment: the analyst recommendation is suitably tentative and consistent with the bounded event context. This does not establish broad reliability; the fan failure confirms the model is still unsuitable for unattended live narrative generation. Do not score the fallback as successful AI. Clean installation on a separate Mac and actual browser interaction remain pending.
