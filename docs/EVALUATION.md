@@ -110,3 +110,8 @@ Final checks reject known unrelated claims and require attacking-progress releva
 
 
 `evaluation/review-final.json` records the final relevance checks: fan pass 9.255 s and broadcast pass 7.285 s transparently returned computed fallback after two failed answers; goal 3.780 s and Spanish pass 7.733 s returned checked local AI. Rejections included unsupported/unrelated wording and missing forward-pass relevance. This is evidence of better failure handling and continuing model-quality limitations, not four successful AI results. Startup/port error handling was additionally verified by automated tests; no Azure resources or paid inference were used.
+
+
+## Focused editor trial
+
+`evaluation/focused-editor-trial.json` records a narrower draft-editing task: fan pass 20.311 s fell back, goal 3.674 s, Spanish pass 4.808 s and broadcast pass 2.919 s returned checked AI. Human review found the Spanish text coherent, broadcast concise and tentative, and goal text unnecessarily hedged a known score change. Accordingly the final routing retains the earlier English fan/goal prompt, and uses the editor task for broadcast/Spanish. This four-request trial does not establish general consistency, nor is it a benchmark of the final hybrid routing. The fan pass remains a reliability limitation. 35 automated checks pass.

@@ -104,3 +104,12 @@ test('reviewed incoherent and unsupported pass explanations fail rather than bec
  }
  assert.equal(validateGenerated('Forward progress could bring the attack closer to goal.',at(3),{...prefs,mode:'broadcast'}).ok,true);
 });
+
+test('forward-pass checks recognize grounded wording variants while retaining unrelated-output rejection',()=>{
+ assert.equal(validateGenerated('Advancing the ball towards the goal could help the next attack.',at(3),prefs).ok,true);
+ assert.equal(validateGenerated('Advancing the ball away from the goal could help.',at(3),prefs).ok,false);
+ assert.equal(validateGenerated("The successful pass advances the team extradition.",at(3),prefs).ok,false);
+ const payload=JSON.parse(prompts(at(3),prefs,'Why does this moment matter?')[1].content);
+ assert.equal(payload.groundedDraft,story(at(3),prefs).interpretation);assert.equal(payload.facts.action,'pass');
+ assert.equal(JSON.parse(prompts(at(3),{...prefs,mode:'broadcast'},'')[1].content).facts,undefined);
+});

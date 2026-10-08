@@ -54,3 +54,6 @@ Both structured and plain-text AI outputs pass the same audience-length, Spanish
 Shot build-up references completed same-team passes and recoveries in the trailing window after the most recent recorded opposing on-ball action. Recovery-to-shot seconds are an event-clock interval, not movement speed, chance quality or causation. Source records support the computed sequence and analyst metric.
 
 The first model download/load has a fifteen-minute startup allowance, separate from the twenty-five-second generation deadline. Shutdown terminates a pending reload worker. `npm run doctor` prints Node/platform/RAM and dependency-directory status without downloads or inference. It does not establish compatibility on untested hardware.
+
+
+Broadcast and Spanish generation now explicitly edits the grounded explanation rather than separately summarizing player/action fields. English fan requests retain the previous tested prompt after the editor trial increased pass latency. English analyst requests retain their JSON task. Forward-pass checks recognize “advancing the ball towards the goal” as a grounded wording variant while rejecting away-from-goal wording and known unrelated claims. This is not a relaxation of evidence boundaries.
