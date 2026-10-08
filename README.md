@@ -8,7 +8,7 @@ Fresh hackathon code started October 5, 2026, inspired by the original PRO-VISIO
 
 - Public source: https://github.com/mberry19932025/PRO-VISION
 - Downloadable AI test build: https://github.com/mberry19932025/PRO-VISION/releases/tag/v0.1.0-preview.1
-- Static preview address being configured: https://mberry19932025.github.io/PRO-VISION/
+- Live static preview: https://mberry19932025.github.io/PRO-VISION/
 
 The Pages preview uses computed explanations. The downloadable build runs Microsoft AI locally; see [judge setup](docs/JUDGE-TEST-BUILD.md). Category eligibility and other-computer testing remain unconfirmed.
 

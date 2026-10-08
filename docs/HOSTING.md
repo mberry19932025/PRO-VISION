@@ -1,6 +1,6 @@
 # Hosting plan: GitHub Pages first, custom domain later
 
-The entrant requested GitHub Pages when the app is complete, with a domain purchase later. GitHub Pages and a downloadable prerelease are being configured for review. No custom domain is configured.
+The entrant requested GitHub Pages when the app is complete, with a domain purchase later. GitHub Pages and the downloadable prerelease are published for review. No custom domain is configured.
 
 ## Prepare the static site
 
@@ -18,7 +18,7 @@ Expected project address after activation and successful deployment:
 
 https://mberry19932025.github.io/PRO-VISION/
 
-Verify the live address after the Pages deployment completes.
+Verified October 8: the page, CSS and browser app module return HTTP 200. GitHub reports the gh-pages deployment built. This verifies static delivery, not live AI or visual browser QA.
 
 ## Working AI
 
@@ -46,3 +46,10 @@ Server changes are tested locally: configurable PORT/HOST, explicit HTTPS PUBLIC
 Before deployment: confirm subscription, model access and quota; select a supported deployment; store AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY and AZURE_OPENAI_DEPLOYMENT as server-side secrets; set PUBLIC_ORIGIN to the actual HTTPS app address; set ingress to port 4180. Use a capped replica configuration and review billing separately. Budget alerts notify; they do not stop charges. Do not create paid resources on the assumption that trial credit is available.
 
 Cloud deployment, container execution and live Azure inference have not yet been verified. The local HTTP integration test runs without credentials. After deployment, test from another browser/account: health, actual generated story, source references, provider failure, replay and keepsake downloads. Keep judge access working through the judging deadline. Do not present a configured health response as proof of successful model generation.
+
+
+## Published judge download
+
+https://github.com/mberry19932025/PRO-VISION/releases/tag/v0.1.0-preview.1
+
+The published prerelease contains PRO-VISION-test-build.zip (129,153 bytes), pinned to source commit 73ac023. Microsoft weights and native dependencies download during local installation and are not included. The page labels its computed-only mode and links the download and setup instructions. Full browser-only AI still requires a separately hosted model/backend; it is not implemented by this Pages publication.
