@@ -1,4 +1,4 @@
-import {at,story,prompts,validateNarrative,unsupportedQuestion} from './stories.js';
+import {at,story,prompts,validateGenerated,unsupportedQuestion} from './stories.js';
 import {demoEvents,match} from './events.js';
 import {explanationAudit} from './workflow.js';
 export function validateRequest(data){
@@ -15,14 +15,14 @@ async function analyzeCore(data,generate,provider){
   let result=null;const trace=[];
   for(let attempt=0;attempt<2;attempt++){
    const messages=prompts(state,data.prefs,data.question);
-   if(attempt)messages[1].content+='\nYour last response failed validation. Return only valid JSON with insight and evidenceIds, citing the selected event.';
+   if(attempt)messages[1].content+=data.prefs.mode==='analyst'&&data.prefs.language==='en'?'\nReturn only valid JSON with insight and evidenceIds, citing the selected event.':'\nReturn only one short sentence using the supplied facts, no extra claims or formatting.';
    let deadline;
-   try{result=validateNarrative(await Promise.race([generate(messages),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(new Error('Generation deadline')),30000);})]),state);}finally{clearTimeout(deadline);}
+   try{result=validateGenerated(await Promise.race([generate(messages),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(new Error('Generation deadline')),30000);})]),state,data.prefs);}finally{clearTimeout(deadline);}
    trace.push({attempt:attempt+1,accepted:result.ok,reason:result.reason??null});
    if(result.ok)break;
   }
   const elapsedMs=Math.round(performance.now()-start);
-  return result.ok?{story:{...base,interpretation:result.insight,evidence:result.evidence,provider},notice:`AI interpretation · ${(elapsedMs/1000).toFixed(1)}s · references passed basic checks. Interpretations still need human review.`,elapsedMs,trace}:{story:base,notice:`AI output failed basic checks after ${trace.length} attempts. Showing the computed explanation.`,elapsedMs,trace};
+  return result.ok?{story:{...base,interpretation:result.insight,evidence:result.evidence,provider,evidenceOrigin:result.evidenceOrigin||'model-selected'},notice:`AI interpretation · ${(elapsedMs/1000).toFixed(1)}s · references passed basic checks. Interpretations still need human review.`,elapsedMs,trace}:{story:base,notice:`AI output failed basic checks after ${trace.length} attempts. Showing the computed explanation.`,elapsedMs,trace};
  }catch(error){return {story:base,notice:error?.message==='Generation deadline'?'AI generation exceeded its response deadline. Showing the computed explanation.':'Microsoft AI is unavailable or busy. Showing the computed explanation.',elapsedMs:Math.round(performance.now()-start)};}
 }
 

@@ -39,3 +39,9 @@ The UI shows the actual ingestion window, computed patterns, explanation provide
 The server stores up to 64 accepted AI responses in memory for ten minutes. Keys include moment, audience, language, club, player and exact question. No failed answer is cached. Returned objects are cloned, cache hits explicitly disclose reuse, and original generation time remains visible. Cache data is lost on restart. Reusing an answer does not improve its factual accuracy.
 
 Native local inference runs in a separate child process. The parent imposes a 25-second generation deadline and kills a stalled worker; a subsequent generation can reload the model. Model startup has a separate deadline. The parent remains responsive during a blocked worker operation. This avoids relying on timers inside a process whose native model call may block its event loop.
+
+## Smaller local generation task
+
+Fan, broadcast and Spanish requests ask the model for plain explanation text. The backend attaches source IDs from the supplied computed context, labels evidenceOrigin as computed-input, and applies the same source, unsupported-detail and future-event checks before replacing the interpretation. English analyst requests retain their previously evaluated JSON contract. Legacy valid JSON responses remain checked as model-selected evidence. The UI distinguishes computed source assignment from model-selected citations.
+
+This is grounded rewriting, not proof that the model independently derived a tactic or selected every cited source. A sentence passing lexical checks still needs semantic review. Broadcast text must stay within eighteen words. Personal memory notes/photos are never included in model prompts.

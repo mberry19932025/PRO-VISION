@@ -69,7 +69,7 @@ $('ask-form').onsubmit=async event=>{
 render();
 let memories=[],selectedMemory=null;
 const memoryStorage='pro-vision-memories-v1';
-try{const saved=JSON.parse(localStorage.getItem(memoryStorage)||'[]');if(Array.isArray(saved))memories=saved.slice(0,6).filter(m=>m.version===1&&demoEvents.some(e=>e.id===m.eventId)&&typeof m.name==='string'&&typeof m.note==='string'&&typeof m.photo==='string').map(m=>createMemory(demoEvents.findIndex(e=>e.id===m.eventId),m.prefs,m,{interpretation:m.interpretation,evidence:m.evidence,provider:m.provider}));}catch{memories=[];}
+try{const saved=JSON.parse(localStorage.getItem(memoryStorage)||'[]');if(Array.isArray(saved))memories=saved.slice(0,6).filter(m=>m.version===1&&demoEvents.some(e=>e.id===m.eventId)&&typeof m.name==='string'&&typeof m.note==='string'&&typeof m.photo==='string').map(m=>createMemory(demoEvents.findIndex(e=>e.id===m.eventId),m.prefs,m,{interpretation:m.interpretation,evidence:m.evidence,provider:m.provider,evidenceOrigin:m.evidenceOrigin}));}catch{memories=[];}
 function showMemory(memory){
  selectedMemory=memory;$('memory-art').innerHTML=memorySVG(memory);$('shirt-art').setAttribute('href','data:image/svg+xml;charset=utf-8,'+encodeURIComponent(memorySVG(memory)));
  for(const key of ['memory-svg','memory-html','memory-link','memory-tap'])$(key).disabled=false;
