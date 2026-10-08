@@ -35,7 +35,7 @@ const server=http.createServer(async(req,res)=>{
    let length=0;const chunks=[];for await(const chunk of req){length+=chunk.length;if(length>4096){json(413,{error:'Request too large'});return;}chunks.push(chunk);}
    let data;try{data=JSON.parse(Buffer.concat(chunks).toString());validateRequest(data);}catch{json(400,{error:'Invalid request'});return;}
    if(generate){const now=Date.now();while(calls.length&&calls[0]<now-60000)calls.shift();if(activeRequests>=2||calls.length>=12){res.setHeader('retry-after','60');json(429,{error:'AI is busy; try again shortly'});return;}calls.push(now);}
-   activeRequests++;try{json(200,await analyze(data,generate,provider));}finally{activeRequests--;}return;
+   activeRequests++;const started=performance.now();try{const result=await analyze(data,generate,provider);console.log(JSON.stringify({type:'story-response',eventIndex:data.index,mode:data.prefs.mode,language:data.prefs.language,provider:result.story.provider,elapsedMs:Math.round(performance.now()-started),attempts:result.trace?.length??0}));json(200,result);}finally{activeRequests--;}return;
   }
   if(req.method!=='GET'||!assets.has(pathname)){json(404,{error:'Not found'});return;}
   const file=assets.get(pathname);const type=file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html';

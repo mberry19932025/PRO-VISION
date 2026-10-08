@@ -42,3 +42,9 @@ Broader authored scenarios, full-match fixtures, independent football review, re
 `evaluation/live-final-guards.json` records actual on-device Microsoft Phi calls after the guard changes. The fan pass request fell back after invalid JSON and an unsupported movement assertion (28.1 s). The analyst pass returned a generated recommendation to review the next recorded action while acknowledging missing defensive positions (13.1 s, one attempt). The unsupported speed question returned a computed data limitation in 0 ms without a model call.
 
 Human assessment: the analyst recommendation is suitably tentative and consistent with the bounded event context. This does not establish broad reliability; the fan failure confirms the model is still unsuitable for unattended live narrative generation. Do not score the fallback as successful AI. Clean installation on a separate Mac and actual browser interaction remain pending.
+
+## Repeated timing check
+
+`evaluation/live-timing.json` records a second three-case check on the same cached model: fan 26.62 s total with computed fallback after two rejected outputs; analyst 12.03 s total with accepted AI and the same tentative next-action recommendation; unsupported speed 0.006 s total with computed limitation and no generation. These are individual timings, not percentile or load measurements. The repeated fan failure is an unresolved reliability problem.
+
+Run `node scripts/measure-ai.mjs` against a running local AI backend to repeat this measurement. It overwrites the latest timing report. The server prints story-response JSON containing elapsed milliseconds, event index, mode, language, returned provider and attempt count; it does not log user question text or personal memory additions.
