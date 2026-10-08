@@ -66,7 +66,7 @@ Before submission: browser QA, broader human-reviewed AI evaluation, better late
 
 Run `npm run build:offline`, then open `dist/PRO-VISION Preview.html` directly in a browser. It embeds the app, styles and synthetic data in one file and uses computed explanations. No Terminal server, module imports or network fetch is needed for startup. A startup banner reports success or an error. The backend and local-AI entry point remain available separately.
 
-All 28 automated checks pass, including offline startup and replay/recap/memory interactions against the actual page IDs in a simulated DOM. This does not replace real browser visual and download testing. No browser automation connection was available for that review.
+All 29 automated checks pass, including offline startup and replay/recap/memory interactions against the actual page IDs in a simulated DOM. This does not replace real browser visual and download testing. No browser automation connection was available for that review.
 
 See [judge test-build instructions](docs/JUDGE-TEST-BUILD.md) for the proposed local installation route and its current limitations.
 

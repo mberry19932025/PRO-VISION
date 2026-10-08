@@ -14,8 +14,8 @@ Record working software, not slides alone. This script is a draft for the verifi
 **0:43–0:58 — Analyst lens**
 “A fan gets a clear explanation. An analyst gets derived measurements and review questions. We don’t invent speed, defensive positions or chance quality when the data doesn’t support them.”
 
-**0:58–1:12 — Evidence and pressure sensitivity**
-“Click a source to replay it. Remove a pressure record to see how that signal changes. This is sensitivity analysis—not a prediction of what would have happened.”
+**0:58–1:12 — Goal and evidence**
+“At the goal, the explanation connects the changed excerpt score to the recorded build-up. Click a source to inspect the earlier pass. These records show a sequence; they do not prove chance quality or player intent.”
 
 **1:12–1:25 — Spanish/player preference and overlay**
 “Language and player preferences shape the experience. The same evidence can produce a timed overlay with machine-readable references.”

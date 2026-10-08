@@ -77,3 +77,12 @@ test('Spanish output rejects an English answer and accepts grounded Spanish word
  assert.equal(validateGenerated('Jules Reed successfully completed a pass during a football game.',state,spanish).ok,false);
  assert.equal(validateGenerated('El pase podría ayudar a avanzar el ataque.',state,spanish).ok,true);
 });
+
+test('goal explanations connect the excerpt score and recorded sequence without inventing chance quality',()=>{
+ const state=at(8),fan=story(state,prefs);
+ assert.match(fan.interpretation,/excerpt score/);assert.ok(fan.evidence.includes('M008'));
+ assert.match(story(state,{...prefs,language:'es'}).interpretation,/marcador del fragmento/);
+ assert.match(story(state,{...prefs,mode:'analyst'}).interpretation,/cannot measure chance quality/);
+ assert.equal(validateGenerated('Noah Silva scored a goal for Cedar FC.',state,prefs).ok,false);
+ assert.equal(validateGenerated('The goal changes the excerpt score.',state,prefs).ok,true);
+});

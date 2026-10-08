@@ -93,3 +93,8 @@ Human review: the fan explains possible forward progress coherently. The broadca
 Plain-text source references identify the computed context supplied to the model, not citations chosen by the model. Goal wording in this test only restates the scoring event; richer explanation quality remains an improvement target.
 
 `evaluation/language-guard.json` records the corrected live run on this Mac: fan pass 3.855 s, goal 2.625 s, Spanish pass 4.679 s, broadcast pass 2.888 s, all fresh local generation. Human review confirms the Spanish answer is Spanish and describes the recorded successful pass with a tentative attacking consequence. Goal wording remains an observation, not a rich explanation. These four requests do not establish load performance, universal model compatibility, or competition readiness.
+
+
+## Goal explanation quality guard
+
+Computed goal explanations now connect the scoring event to the excerpt score and invite replay of the preceding recorded actions. Analyst wording explicitly separates sequence review from unavailable chance-quality measurements. Plain model goal output must mention a score consequence or recorded sequence; the previously observed “scored a goal” restatement is rejected and retried, then falls back transparently if necessary. This is a coarse usefulness check, not a semantic correctness proof.
