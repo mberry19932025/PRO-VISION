@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-10-08T19:29:44.338Z",
+  "model": "Phi-3.5-mini-instruct-generic-gpu:2",
+  "results": [
+    {
+      "case": {
+        "label": "fan pass",
+        "mode": "fan",
+        "question": "Why might this moment matter?"
+      },
+      "clientElapsedMs": 6179,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "This moment could be crucial for advancing the ball towards scoring.",
+          "evidence": [
+            "M004",
+            "M002",
+            "M003"
+          ],
+          "provider": "foundry-local",
+          "metrics": null
+        },
+        "notice": "AI interpretation · 6.2s · references passed basic checks. Interpretations still need human review.",
+        "elapsedMs": 6171,
+        "trace": [
+          {
+            "attempt": 1,
+            "accepted": true,
+            "reason": null
+          }
+        ]
+      }
+    },
+    {
+      "case": {
+        "label": "analyst pass",
+        "mode": "analyst",
+        "question": "What recorded action should I review?"
+      },
+      "clientElapsedMs": 23553,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "Review the next passing option. Forward progress alone does not prove a defensive line was broken.",
+          "evidence": [
+            "M004",
+            "M002",
+            "M003"
+          ],
+          "provider": "computed",
+          "metrics": {
+            "advanceM": 21,
+            "passDistanceM": 21.6,
+            "pressureWindowSeconds": 20
+          }
+        },
+        "notice": "AI output failed basic checks after 2 attempts. Showing the computed explanation.",
+        "elapsedMs": 23547,
+        "trace": [
+          {
+            "attempt": 1,
+            "accepted": false,
+            "reason": "Unsupported detail"
+          },
+          {
+            "attempt": 2,
+            "accepted": false,
+            "reason": "Invalid JSON"
+          }
+        ]
+      }
+    },
+    {
+      "case": {
+        "label": "unsupported speed",
+        "mode": "fan",
+        "question": "How fast was the ball?"
+      },
+      "clientElapsedMs": 5,
+      "result": {
+        "story": {
+          "title": "A pass that moves the story forward",
+          "observed": "2:08 · Jules Reed · Cedar FC · pass: complete.",
+          "interpretation": "These records do not include speed, xG, off-ball positions or player intent. That question cannot be answered from this dataset.",
+          "evidence": [
+            "M004"
+          ],
+          "provider": "computed",
+          "metrics": null
+        },
+        "notice": "The requested information is not present in the event contract. No AI claim was generated.",
+        "elapsedMs": 0
+      }
+    }
+  ]
+}

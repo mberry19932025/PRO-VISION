@@ -48,3 +48,13 @@ Human assessment: the analyst recommendation is suitably tentative and consisten
 `evaluation/live-timing.json` records a second three-case check on the same cached model: fan 26.62 s total with computed fallback after two rejected outputs; analyst 12.03 s total with accepted AI and the same tentative next-action recommendation; unsupported speed 0.006 s total with computed limitation and no generation. These are individual timings, not percentile or load measurements. The repeated fan failure is an unresolved reliability problem.
 
 Run `node scripts/measure-ai.mjs` against a running local AI backend to repeat this measurement. It overwrites the latest timing report. The server prints story-response JSON containing elapsed milliseconds, event index, mode, language, returned provider and attempt count; it does not log user question text or personal memory additions.
+
+## Compact-prompt experiment
+
+`evaluation/live-compact-prompt.json`: fan pass 6.18 s with an accepted AI answer; analyst pass 23.55 s with computed fallback; unsupported speed 0.005 s with no model call. Fan wording (“could be crucial”) is tentative but generic and overemphasizes importance. It is not proof of football expertise.
+
+The final implementation uses the compact grounded rewriting task for fan/broadcast while restoring the previously tested analyst prompt. Fan rewriting starts from the computed explanation and bounded source IDs; it does not autonomously discover tactics. Retain lexical guards and human review requirements. Broadcast, Spanish, varied moments and adversarial inputs still need a broader live evaluation. All 21 automated checks pass.
+
+## Final audience-specific comparison
+
+`evaluation/live-audience-prompts.json` preserves the final run: fan pass 5.86 s and analyst pass 11.82 s, both accepted on the first attempt; unsupported speed 0.005 s with no generation. This compares the same selected pass/questions against previous timing cases. It is a three-case spot check, not a benchmark. Successful basic validation is not semantic proof.

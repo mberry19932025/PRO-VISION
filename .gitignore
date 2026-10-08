@@ -5,3 +5,5 @@ dist/
 !.env.example
 *.log
 .provision/
+
+node_modules
