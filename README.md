@@ -4,6 +4,14 @@
 
 Fresh hackathon code started October 5, 2026, inspired by the original PRO-VISION prototype document's multi-perspective viewing, replay and personalized experience. The helmet remains a future concept; this working software uses synthetic association-football events.
 
+## GitHub access
+
+- Public source: https://github.com/mberry19932025/PRO-VISION
+- Downloadable AI test build: https://github.com/mberry19932025/PRO-VISION/releases/tag/v0.1.0-preview.1
+- Static preview address being configured: https://mberry19932025.github.io/PRO-VISION/
+
+The Pages preview uses computed explanations. The downloadable build runs Microsoft AI locally; see [judge setup](docs/JUDGE-TEST-BUILD.md). Category eligibility and other-computer testing remain unconfirmed.
+
 ## What works
 
 - A coherent nine-event synthetic excerpt (2:00–2:38), fictional clubs/players, original pitch replay and synchronized clock.
@@ -60,7 +68,7 @@ Before submission: browser QA, broader human-reviewed AI evaluation, better late
 
 ### Fan memories
 
-“My match. My memory.” captures the selected event with its evidence, optional personal note/photo and a locally saved keepsake. Download a memory card or an interactive offline HTML version. A shirt mockup demonstrates how a simulated tag tap could reopen the replay. Real XtremeSignPost data, physical tags and clothing production are not connected. See [memory feature details](docs/MEMORIES.md). All 18 automated tests pass; browser interaction and visual review remain pending.
+“My match. My memory.” captures the selected event with its evidence, optional personal note/photo and a locally saved keepsake. Download a memory card or an interactive offline HTML version. A shirt mockup demonstrates how a simulated tag tap could reopen the replay. Real XtremeSignPost data, physical tags and clothing production are not connected. See [memory feature details](docs/MEMORIES.md). Browser interaction and visual review remain pending.
 
 ### Preview without a server
 

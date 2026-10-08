@@ -1,6 +1,6 @@
 # Hosting plan: GitHub Pages first, custom domain later
 
-The entrant requested GitHub Pages when the app is complete, with a domain purchase later. No Pages site or custom domain is enabled by this change.
+The entrant requested GitHub Pages when the app is complete, with a domain purchase later. GitHub Pages and a downloadable prerelease are being configured for review. No custom domain is configured.
 
 ## Prepare the static site
 
@@ -10,15 +10,15 @@ npm run build:pages
 
 `dist/` contains the original interface, pitch replay, event engine, computed stories, preferences, evidence lab, recap/export functions and `.nojekyll`. CSS and module paths are relative so the same build works under `/PRO-VISION/` or a future domain root. No API keys, local models, server files or private Sites identity belong in this publishing bundle.
 
-## Publish when the demo is complete
+## Publish the review preview
 
-Publish the contents of `dist/` to the root of a dedicated `gh-pages` branch. In repository Settings → Pages, choose Deploy from a branch, `gh-pages`, `/ (root)`. This does not require installing a custom workflow file with the current credential, which lacks workflow permission. Creating/enabling that publishing branch is deferred until completion.
+Publish the contents of `dist/` to the root of a dedicated `gh-pages` branch. In repository Settings → Pages, choose Deploy from a branch, `gh-pages`, `/ (root)`. This does not require installing a custom workflow file with the current credential, which lacks workflow permission. The branch contains static preview assets only; the model runs in the separate local test build.
 
 Expected project address after activation and successful deployment:
 
 https://mberry19932025.github.io/PRO-VISION/
 
-This is a planned address, not a currently verified live URL.
+Verify the live address after the Pages deployment completes.
 
 ## Working AI
 
