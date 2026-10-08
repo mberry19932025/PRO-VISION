@@ -10,6 +10,8 @@
 - [x] Recap and dataset downloads.
 - [x] Real local Microsoft generation, basic checks and fallback.
 - [x] 26 automated checks, including hosted HTTP integration checks.
+- [x] Fresh archive dependency/runtime installation checked on the development Mac; shared model-weight cache.
+- [ ] Independent installation on another supported computer and fresh model download.
 - [x] Personal memory exports and clearly simulated clothing replay.
 - [x] Hosted server configuration and container recipe prepared; cloud execution remains unverified.
 

@@ -68,3 +68,13 @@ The revised server runs local inference in a child process and enforces a parent
 ## Isolated-worker live cache check
 
 `evaluation/live-cache.json` records successful real Phi inference after worker isolation: fan first 5.746 s, identical fan repeat 0.005 s; analyst first 11.373 s, identical analyst repeat 0.005 s. First requests were misses with real inference; repeated requests were explicit cache hits without new inference. These four local requests are not a load benchmark or evidence of fresh generation in milliseconds. Broader semantic and multilingual reliability remain unverified.
+
+## Clean dependency installation and broader cases
+
+A fresh archive folder installed the pinned SDK and native runtime, passed all 26 tests and loaded the existing weight cache on the same Mac. `evaluation/clean-install.json` records fan pass 5.773 s (accepted AI), goal 22.642 s (fallback), Spanish pass 27.296 s (fallback), and broadcast pass 22.335 s (fallback). This is evidence of incomplete reliability, not a successful multilingual/broadcast benchmark. Failures are detailed in their traces.
+
+A structured JSON response-format experiment is evaluated separately. Correct formatting cannot establish football correctness. Existing evidence and unsupported-claim checks remain enabled.
+
+## Structured-format experiment
+
+`evaluation/structured-output.json` records an attempted SDK json_schema response-format setting on the tested native runtime. All four requests returned computed fallback almost immediately because generation failed; no successful constrained output is claimed. The setting was removed. Final code retains the previously tested generation settings and existing checks. This experiment did not resolve broader narrative reliability.

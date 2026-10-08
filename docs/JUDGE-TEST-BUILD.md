@@ -16,6 +16,8 @@ npm run ai:setup
 npm run preview:ai
 ```
 
+After installing dependencies/runtime, Mac users can also double-click `Open PRO-VISION AI.command` in the extracted project folder.
+
 The app prints its address after the model loads and opens the browser on macOS. Leave the Terminal window open. On other platforms open the printed URL manually; those platforms have not been tested. First launch downloads the model; subsequent launches use the ignored local cache. The installer retrieves Microsoft's native libraries. It emits a known duplicate Objective-C class warning on the tested Mac; see EVALUATION.md for limitations.
 
 ## Verify actual AI

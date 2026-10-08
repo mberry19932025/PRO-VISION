@@ -2,7 +2,7 @@
 
 **Every moment, explained.** An evidence-linked football storytelling prototype for the Microsoft × Premier League Inside the Game hackathon.
 
-Fresh hackathon code started October 5, 2026, inspired by the original PRO-VISION prototype document's multi-perspective viewing, replay and personalized experience. The helmet remains a future concept; this working software uses synthetic association-football events. The folder retains its initial title `matchlens`; the product name is **PRO-VISION**.
+Fresh hackathon code started October 5, 2026, inspired by the original PRO-VISION prototype document's multi-perspective viewing, replay and personalized experience. The helmet remains a future concept; this working software uses synthetic association-football events.
 
 ## What works
 

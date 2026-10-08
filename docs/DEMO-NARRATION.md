@@ -9,7 +9,7 @@ Record working software, not slides alone. This script is a draft for the verifi
 “Here, the replay calculates forward progress and the recent pressure context. It only uses events recorded up to this moment, so a later goal cannot leak into this explanation.”
 
 **0:25–0:43 — Make one real Microsoft AI request**
-“Microsoft AI interprets that bounded evidence. Observations stay separate from interpretation, and source IDs let us inspect the records. If an answer fails our checks, PRO-VISION falls back to its computed explanation.”
+“Microsoft AI adapts an explanation from bounded football evidence. Observations stay separate from interpretation, and source IDs let us inspect the records. If an answer fails our checks, PRO-VISION falls back to its computed explanation.”
 
 **0:43–0:58 — Analyst lens**
 “A fan gets a clear explanation. An analyst gets derived measurements and review questions. We don’t invent speed, defensive positions or chance quality when the data doesn’t support them.”
