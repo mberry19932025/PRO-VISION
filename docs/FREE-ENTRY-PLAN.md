@@ -16,7 +16,7 @@ No paid cloud deployment is needed for this test-build approach. Foundry Local u
 2. Test the included installation steps on a second supported Mac with a clean cache.
 3. Complete browser checks: replay, audience modes, AI arrival/fallback, downloads, preferences and responsive layout.
 4. Evaluate more moments, Spanish and unsupported/adversarial questions. Record rejected outputs and actual timing.
-5. Restore GitHub authentication and publish all final commits. A local archive is useful for review but does not replace public code.
+5. Publish all final commits (GitHub authentication is working). A local archive is useful for review but does not replace public code.
 6. Record actual software under two minutes, publish the video and complete the English submission before the deadline. Maintain the working test build through judging.
 
 The current prototype is not declared submission-ready. Short excerpt coverage, template recaps, uncertain category fit and incomplete judge installation/browser QA remain material limitations. A faster answer in one case is not a production latency claim.

@@ -29,3 +29,12 @@ test('caller mutation cannot rewrite accepted events or returned state',()=>{
  const output=state.snapshot();output.latest.to[0]=0;
  assert.equal(state.snapshot().latest.to[0],47);
 });
+
+test('shot build-up includes the recovery, measures event-clock interval and stops at opponent possession',()=>{
+ const state=new MatchState();for(const e of demoEvents)state.ingest(e);
+ const signal=state.snapshot().signals.find(s=>s.kind==='shot-build-up');
+ assert.deepEqual(signal.eventIds,['M007','M008','M009']);assert.equal(signal.recoveryToShotSeconds,8);
+ state.ingest({id:'M010',second:159,team:'Marina FC',player:'Lee Chen',type:'pass',outcome:'complete',from:[25,40],to:[44,36]});
+ state.ingest({id:'M011',second:160,team:'Cedar FC',player:'Noah Silva',type:'shot',outcome:'saved',from:[83,34],to:[105,34]});
+ assert.equal(state.snapshot().signals.some(s=>s.kind==='shot-build-up'),false);
+});

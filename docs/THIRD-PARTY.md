@@ -6,4 +6,4 @@
 
 All event records, fictional identities, HTML, CSS and pitch graphics in this new project were authored for this prototype. No real match footage, sponsor marks, club badges, copyrighted music or external fonts are included. No affiliation with Microsoft or the Premier League is implied by the product.
 
-No project license is assigned here on the entrant's behalf; select an appropriate source license before public GitHub publication. Public visibility alone is not an open-source license.
+No project license is assigned here on the entrant's behalf; source licensing remains an entrant decision. Public visibility alone is not an open-source license.

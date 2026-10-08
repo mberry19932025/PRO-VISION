@@ -98,3 +98,15 @@ Plain-text source references identify the computed context supplied to the model
 ## Goal explanation quality guard
 
 Computed goal explanations now connect the scoring event to the excerpt score and invite replay of the preceding recorded actions. Analyst wording explicitly separates sequence review from unavailable chance-quality measurements. Plain model goal output must mention a score consequence or recorded sequence; the previously observed “scored a goal” restatement is rejected and retried, then falls back transparently if necessary. This is a coarse usefulness check, not a semantic correctness proof.
+
+
+## Comprehensive review — October 8
+
+34 automated checks pass, including startup termination, occupied-port errors, possession-boundary build-up evidence, and validation parity for structured/plain AI output. Installation diagnostics passed on the existing Node 24 Apple Silicon Mac with 8 GiB RAM and the installed native runtime. This does not establish another computer's compatibility or fresh-download success.
+
+`evaluation/review-round-1.json` records live output before the final relevance corrections. Fan pass 4.305 s mentioned an unsupported possession strategy/scoring opportunity; broadcast 3.142 s contained the nonsensical word “extradition.” Both passed earlier basic checks and were rejected on human review. Regression tests now reject those exact responses in either output format. Spanish pass 6.022 s was readable Spanish, goal 3.410 s connected the score, analyst goal 25.912 s was accepted after repair and suggested reviewing the preceding pass with a defensive-position limitation. The unsupported-speed question took 6 ms and made no model call. These are individual local requests, not a load benchmark.
+
+Final checks reject known unrelated claims and require attacking-progress relevance for progressive-pass explanations. This improves observed failure handling; it is not a complete meaning checker and cannot establish universal model quality. Browser connection discovery returned no available browser, so visual layout, actual downloads and real browser interactions remain pending.
+
+
+`evaluation/review-final.json` records the final relevance checks: fan pass 9.255 s and broadcast pass 7.285 s transparently returned computed fallback after two failed answers; goal 3.780 s and Spanish pass 7.733 s returned checked local AI. Rejections included unsupported/unrelated wording and missing forward-pass relevance. This is evidence of better failure handling and continuing model-quality limitations, not four successful AI results. Startup/port error handling was additionally verified by automated tests; no Azure resources or paid inference were used.

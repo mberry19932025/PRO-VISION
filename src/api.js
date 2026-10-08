@@ -15,7 +15,11 @@ async function analyzeCore(data,generate,provider){
   let result=null;const trace=[];
   for(let attempt=0;attempt<2;attempt++){
    const messages=prompts(state,data.prefs,data.question);
-   if(attempt)messages[1].content+=data.prefs.mode==='analyst'&&data.prefs.language==='en'?'\nReturn only valid JSON with insight and evidenceIds, citing the selected event.':'\nReturn only one short sentence using the supplied facts, no extra claims or formatting.';
+   if(attempt){
+    const format=data.prefs.mode==='analyst'&&data.prefs.language==='en'?'Return only valid JSON with insight and evidenceIds, citing the selected event.':'Return only one short sentence using the supplied facts, no extra claims or formatting.';
+    messages[1].content+=`\nPrevious answer rejected: ${result.reason}. ${format} Explain relevance, not only what happened.`;
+    if(data.prefs.language==='es')messages[1].content+=' Responde únicamente en español.';
+   }
    let deadline;
    try{result=validateGenerated(await Promise.race([generate(messages),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(new Error('Generation deadline')),30000);})]),state,data.prefs);}finally{clearTimeout(deadline);}
    trace.push({attempt:attempt+1,accepted:result.ok,reason:result.reason??null});

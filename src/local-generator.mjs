@@ -1,15 +1,16 @@
 import {fork} from 'node:child_process';
-export async function createLocalGenerator({workerURL=new URL('./local-model-worker.mjs',import.meta.url),timeoutMs=25000,startupMs=120000}={}){
- let worker=null,loading=null,busy=false,modelId=null,sequence=0,closed=false;
+export async function createLocalGenerator({workerURL=new URL('./local-model-worker.mjs',import.meta.url),timeoutMs=25000,startupMs=900000}={}){
+ let worker=null,startingWorker=null,loading=null,busy=false,modelId=null,sequence=0,closed=false;
  const start=()=>{
   if(closed)return Promise.reject(new Error('Closed'));
   if(worker)return Promise.resolve(worker);
   if(loading)return loading;
   loading=new Promise((resolve,reject)=>{
    const candidate=fork(workerURL,[],{stdio:['ignore','pipe','pipe','ipc']});
+   startingWorker=candidate;
    candidate.stdout.on('data',b=>process.stdout.write(b));candidate.stderr.on('data',b=>process.stderr.write(b));
-   const timer=setTimeout(()=>{candidate.kill('SIGKILL');reject(new Error('Local model startup deadline'));},startupMs);
-   const cleanup=()=>{clearTimeout(timer);candidate.off('message',ready);candidate.off('error',fail);candidate.off('exit',fail);};
+   const timer=setTimeout(()=>{cleanup();candidate.kill('SIGKILL');reject(new Error('Local model startup deadline'));},startupMs);
+   const cleanup=()=>{if(startingWorker===candidate)startingWorker=null;clearTimeout(timer);candidate.off('message',ready);candidate.off('error',fail);candidate.off('exit',fail);};
    const fail=()=>{cleanup();reject(new Error('Local model startup failed'));};
    const ready=message=>{if(message.type==='ready'){cleanup();worker=candidate;modelId=message.modelId;candidate.on('exit',()=>{if(worker===candidate)worker=null;});resolve(candidate);}else if(message.type==='startup-error'){candidate.kill('SIGKILL');fail();}};
    candidate.on('message',ready);candidate.once('error',fail);candidate.once('exit',fail);
@@ -30,5 +31,5 @@ export async function createLocalGenerator({workerURL=new URL('./local-model-wor
     candidate.send({type:'generate',id,messages},error=>{if(error)exit();});
    });
   }finally{busy=false;}
- },async close(){closed=true;const candidate=worker;worker=null;if(candidate)candidate.kill('SIGKILL');}};
+ },async close(){closed=true;const candidate=worker,pending=startingWorker;worker=null;if(candidate)candidate.kill('SIGKILL');if(pending&&pending!==candidate)pending.kill('SIGKILL');}};
 }

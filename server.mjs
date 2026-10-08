@@ -37,5 +37,6 @@ const server=http.createServer(async(req,res)=>{
  }catch{json(500,{error:'Request failed'});}
 });
 server.listen(port,host,()=>console.log('PRO-VISION listening on port '+server.address().port));
-let stopping=false;async function shutdown(){if(stopping)return;stopping=true;server.close();try{await close();}finally{process.exit(0);}}
-process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
+server.on('error',error=>{console.error(error.code==='EADDRINUSE'?`Port ${port} is already in use. Close the other PRO-VISION Terminal or choose another PORT.`:'Could not start the server. Check HOST and PORT.');shutdown(1);});
+let stopping=false;async function shutdown(exitCode=0){if(stopping)return;stopping=true;server.close();try{await close();}finally{process.exit(exitCode);}}
+process.on('SIGINT',()=>shutdown());process.on('SIGTERM',()=>shutdown());

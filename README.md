@@ -7,7 +7,7 @@ Fresh hackathon code started October 5, 2026, inspired by the original PRO-VISIO
 ## What works
 
 - A coherent nine-event synthetic excerpt (2:00–2:38), fictional clubs/players, original pitch replay and synchronized clock.
-- Computed score, shots, pass accuracy, pass distance, forward progress, recorded possession changes and pressure clusters.
+- Computed score, shots, pass accuracy, pass distance, forward progress, recorded possession changes, pressure clusters and source-linked recovery-to-shot intervals.
 - Fan/analyst/broadcast lenses, lower-third graphic preview, English/Spanish templates, club/player filters for the stream and recap.
 - Clickable evidence, a pressure-record removal experiment, overlay JSON, recap and dataset downloads.
 - Real Microsoft Phi-3.5-mini generation through Foundry Local in the **local Node server**, with basic checks, one repair attempt and visibly computed fallback.
@@ -66,7 +66,7 @@ Before submission: browser QA, broader human-reviewed AI evaluation, better late
 
 Run `npm run build:offline`, then open `dist/PRO-VISION Preview.html` directly in a browser. It embeds the app, styles and synthetic data in one file and uses computed explanations. No Terminal server, module imports or network fetch is needed for startup. A startup banner reports success or an error. The backend and local-AI entry point remain available separately.
 
-All 29 automated checks pass, including offline startup and replay/recap/memory interactions against the actual page IDs in a simulated DOM. This does not replace real browser visual and download testing. No browser automation connection was available for that review.
+All 34 automated checks pass, including offline startup and replay/recap/memory interactions against the actual page IDs in a simulated DOM. This does not replace real browser visual and download testing. No browser automation connection was available for that review.
 
 See [judge test-build instructions](docs/JUDGE-TEST-BUILD.md) for the proposed local installation route and its current limitations.
 

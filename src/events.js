@@ -58,6 +58,12 @@ export class MatchState {
    const pressure=context.filter(e=>e.type==='pressure'&&e.team===team);
    if(pressure.length>=2)signals.push({kind:'pressure-cluster',team,eventIds:pressure.map(e=>e.id),definition:'At least two recorded pressure actions in the preceding 20 seconds; not measured tactical control.'});
   }
+  if(latest?.type==='shot'){
+   const opponentOnBall=context.findLastIndex(e=>e.team!==latest.team&&(e.type==='pass'||e.type==='shot'||(e.type==='tackle'&&e.outcome==='won')));
+   const buildUp=context.slice(opponentOnBall+1).filter(e=>e.team===latest.team&&((e.type==='pass'&&e.outcome==='complete')||(e.type==='tackle'&&e.outcome==='won')));
+   const recovery=buildUp.findLast(e=>e.type==='tackle');
+   if(buildUp.length)signals.push({kind:'shot-build-up',eventIds:[...buildUp.map(e=>e.id),latest.id],recoveryToShotSeconds:recovery?latest.second-recovery.second:null,definition:'Recorded same-team completed passes and recoveries before the shot, after the last recorded opponent on-ball action, within the trailing 20-second window; sequence, not proof of causation.'});
+  }
   if(changes.at(-1)?.eventId===latest?.id)signals.push({kind:'possession-change',...changes.at(-1),eventIds:[latest.id]});
   return structuredClone({clock:asOfClock,latest:latest??null,stats,recordedOnBallTeam:possession,changes,signals,context});
  }

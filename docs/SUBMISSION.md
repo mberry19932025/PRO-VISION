@@ -9,7 +9,7 @@
 - [x] Evidence replay, pressure sensitivity lab and overlay export.
 - [x] Recap and dataset downloads.
 - [x] Real local Microsoft generation, basic checks and fallback.
-- [x] 29 automated checks, including hosted HTTP integration checks.
+- [x] 34 automated checks, including hosted HTTP integration checks.
 - [x] Fresh archive dependency/runtime installation checked on the development Mac; shared model-weight cache.
 - [ ] Independent installation on another supported computer and fresh model download.
 - [x] Personal memory exports and clearly simulated clothing replay.

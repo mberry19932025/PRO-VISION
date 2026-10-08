@@ -86,3 +86,21 @@ test('goal explanations connect the excerpt score and recorded sequence without 
  assert.equal(validateGenerated('Noah Silva scored a goal for Cedar FC.',state,prefs).ok,false);
  assert.equal(validateGenerated('The goal changes the excerpt score.',state,prefs).ok,true);
 });
+
+test('structured AI answers cannot bypass language, goal relevance or broadcast length checks',()=>{
+ const raw=(insight,id)=>JSON.stringify({insight,evidenceIds:[id]});
+ assert.equal(validateGenerated(raw('Noah Silva scored a goal for Cedar FC.','M009'),at(8),prefs).ok,false);
+ assert.equal(validateGenerated(raw('The goal changes the excerpt score.','M009'),at(8),prefs).ok,true);
+ assert.equal(validateGenerated(raw('word '.repeat(19),'M004'),at(3),{...prefs,mode:'broadcast'}).ok,false);
+ assert.equal(validateGenerated(raw('The pass may help.','M004'),at(3),{...prefs,language:'es'}).ok,false);
+ assert.deepEqual(story(at(8),prefs).evidence,['M009','M007','M008']);
+ assert.equal(story(at(8),{...prefs,mode:'analyst'}).metrics.recoveryToShotSeconds,8);
+});
+
+test('reviewed incoherent and unsupported pass explanations fail rather than becoming broadcast content',()=>{
+ for(const insight of ["Jules Reed's successful pass advances the team' extradition.","This moment could be significant as a successful pass in a team's possession strategy, potentially leading to a scoring opportunity.",'Jules Reed successfully completed a pass during a football game.']){
+  assert.equal(validateGenerated(insight,at(3),prefs).ok,false);
+  assert.equal(validateGenerated(JSON.stringify({insight,evidenceIds:['M004']}),at(3),prefs).ok,false);
+ }
+ assert.equal(validateGenerated('Forward progress could bring the attack closer to goal.',at(3),{...prefs,mode:'broadcast'}).ok,true);
+});

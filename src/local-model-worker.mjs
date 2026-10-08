@@ -1,6 +1,7 @@
 import {mkdir} from 'node:fs/promises';
 import {FoundryLocalManager} from 'foundry-local-sdk';
 let manager,model,client;
+process.on('disconnect',()=>process.exit(0));
 try{
  const root=new URL('../.provision/',import.meta.url);await mkdir(root,{recursive:true});
  const path=n=>decodeURIComponent(new URL(n,root).pathname);

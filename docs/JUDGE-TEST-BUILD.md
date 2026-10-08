@@ -13,12 +13,13 @@ Download or clone the public repository, enter its directory, then run:
 ```sh
 npm ci --ignore-scripts
 npm run ai:setup
+npm run doctor
 npm run preview:ai
 ```
 
 After installing dependencies/runtime, Mac users can also double-click `Open PRO-VISION AI.command` in the extracted project folder.
 
-The app prints its address after the model loads and opens the browser on macOS. Leave the Terminal window open. On other platforms open the printed URL manually; those platforms have not been tested. First launch downloads the model; subsequent launches use the ignored local cache. The installer retrieves Microsoft's native libraries. It emits a known duplicate Objective-C class warning on the tested Mac; see EVALUATION.md for limitations.
+The app prints its address after the model loads and opens the browser on macOS. Leave the Terminal window open. On other platforms open the printed URL manually; those platforms have not been tested. First launch may take substantially longer than later launches: allow up to 15 minutes for downloads and loading. This is separate from the bounded generation deadline. The doctor command reports setup details without downloading or running a model. First launch downloads the model; subsequent launches use the ignored local cache. The installer retrieves Microsoft's native libraries. It emits a known duplicate Objective-C class warning on the tested Mac; see EVALUATION.md for limitations.
 
 ## Verify actual AI
 

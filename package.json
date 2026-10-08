@@ -11,7 +11,8 @@
     "dev:ai": "node --env-file-if-exists=.env server.mjs --ai",
     "ai:setup": "node node_modules/foundry-local-sdk/script/install-native.cjs",
     "build:offline": "node scripts/offline.mjs",
-    "preview:ai": "node scripts/local-ai-preview.mjs"
+    "preview:ai": "node scripts/local-ai-preview.mjs",
+    "doctor": "node scripts/doctor.mjs"
   },
   "devDependencies": {
     "foundry-local-sdk": "2.1.0"

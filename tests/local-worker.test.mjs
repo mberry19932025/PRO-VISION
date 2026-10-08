@@ -10,3 +10,7 @@ test('blocked inference is terminated while parent stays responsive and next req
   assert.equal(await local.generate([{content:'ok'}]),'checked output');
  }finally{await local.close();}
 });
+
+test('a stalled model startup is terminated within its configured limit',{timeout:5000},async()=>{
+ await assert.rejects(createLocalGenerator({workerURL:new URL('./fixtures/startup-worker.mjs',import.meta.url),startupMs:100}),/startup deadline/);
+});

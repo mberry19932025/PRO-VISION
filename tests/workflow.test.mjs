@@ -11,7 +11,7 @@ test('accepted answers are reused with honest original timing and clone isolatio
  const cached=await run(request);assert.equal(calls,1);assert.equal(cached.cacheStatus,'hit');assert.notEqual(cached.story.interpretation,'tampered');assert.equal(cached.elapsedMs,0);assert.equal(typeof cached.originalGenerationMs,'number');assert.match(cached.notice,/no new inference/);assert.match(cached.audit.stages[2].detail,/reused/);
 });
 test('cache separates audience, language, club, player, question and moment',async()=>{
- let calls=0;const run=createAnalyzer(async messages=>{calls++;const payload=JSON.parse(messages[1].content);return JSON.stringify({insight:payload.language==='Spanish'?'El pase podría ayudar a avanzar el ataque.':'The recorded action could help tell the story.',evidenceIds:[payload.selectedId||payload.selected.id]});},'foundry-local');
+ let calls=0;const run=createAnalyzer(async messages=>{calls++;const payload=JSON.parse(messages[1].content);return JSON.stringify({insight:payload.language==='Spanish'?'El pase podría ayudar a avanzar el ataque.':(payload.selectedId||payload.selected.id)==='M009'?'The goal changes the excerpt score.':'The pass could help advance the attack.',evidenceIds:[payload.selectedId||payload.selected.id]});},'foundry-local');
  await run(request);for(const change of [{prefs:{...prefs,mode:'analyst'}},{prefs:{...prefs,language:'es'}},{prefs:{...prefs,team:'Cedar FC'}},{prefs:{...prefs,player:'Jules Reed'}},{question:'What next?'},{index:8}])await run({...request,...change});assert.equal(calls,7);
 });
 test('cache expires, stays bounded and never stores failed generation',async()=>{

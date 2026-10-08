@@ -45,3 +45,12 @@ Native local inference runs in a separate child process. The parent imposes a 25
 Fan, broadcast and Spanish requests ask the model for plain explanation text. The backend attaches source IDs from the supplied computed context, labels evidenceOrigin as computed-input, and applies the same source, unsupported-detail and future-event checks before replacing the interpretation. English analyst requests retain their previously evaluated JSON contract. Legacy valid JSON responses remain checked as model-selected evidence. The UI distinguishes computed source assignment from model-selected citations.
 
 This is grounded rewriting, not proof that the model independently derived a tactic or selected every cited source. A sentence passing lexical checks still needs semantic review. Broadcast text must stay within eighteen words. Personal memory notes/photos are never included in model prompts.
+
+
+## Review hardening
+
+Both structured and plain-text AI outputs pass the same audience-length, Spanish-language and goal-relevance checks. Checks operate on the explanation field, so JSON keys or source IDs cannot masquerade as Spanish text. Retry instructions identify the rejected check; failure still yields computed fallback. These remain lexical checks, not semantic verification. Model prompts now include selected club/player preferences as viewer context, not match evidence.
+
+Shot build-up references completed same-team passes and recoveries in the trailing window after the most recent recorded opposing on-ball action. Recovery-to-shot seconds are an event-clock interval, not movement speed, chance quality or causation. Source records support the computed sequence and analyst metric.
+
+The first model download/load has a fifteen-minute startup allowance, separate from the twenty-five-second generation deadline. Shutdown terminates a pending reload worker. `npm run doctor` prints Node/platform/RAM and dependency-directory status without downloads or inference. It does not establish compatibility on untested hardware.
