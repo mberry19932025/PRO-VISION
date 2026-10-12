@@ -1,0 +1,20 @@
+{
+  "name": "provision-ai",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "dev:ai": "node --env-file-if-exists=.env scripts/dev.mjs --foundry",
+    "ai:setup": "node node_modules/foundry-local-sdk/script/install-native.cjs",
+    "build": "node scripts/compile.mjs && node scripts/standalone.mjs && bash scripts/build.sh",
+    "test": "node --test tests/*.test.mjs",
+    "validate": "node scripts/validate-artifact.mjs",
+    "start": "node scripts/dev.mjs"
+  },
+  "devDependencies": {
+    "foundry-local-sdk": "2.1.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
