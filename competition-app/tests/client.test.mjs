@@ -148,3 +148,11 @@ test('first-visit guide and question suggestions help without automatic model ca
  h.get('start-experience').listeners.click();assert.equal(h.run('events[index].type'),'shot');assert.match(h.get('question').value,/shot/);assert.equal(calls,0);
  h.get('question').value='score';h.get('question').listeners.input();const chips=h.get('question-suggestions').children;assert.equal(chips.length,1);chips[0].listeners.click();assert.equal(h.get('question').value,'What is the score?');assert.equal(calls,0);
 });
+
+test('show-me-why freezes the explanation and replays only its cited records',()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});h.get('scrub').value='9';h.get('scrub').listeners.input();const text=h.get('insight').textContent;
+ h.get('show-why').listeners.click();assert.equal(h.get('evidence-tour').hidden,false);assert.equal(h.get('tour-explanation').textContent,text);assert.equal(h.get('tour-prev').disabled,true);
+ const ids=h.run('evidenceTour.ids');assert.ok(ids.every(id=>Number(id.slice(3))<=10));h.get('tour-next').listeners.click();h.get('tour-replay').listeners.click();assert.equal(h.run('events[index].id'),ids[1]);assert.equal(h.get('tour-explanation').textContent,text);assert.match(h.get('tour-original').textContent,/EV-010/);assert.equal(calls,0);
+ h.get('tour-close').listeners.click();assert.equal(h.get('evidence-tour').hidden,true);
+});
+test('changing a moment closes an old evidence tour',()=>{const h=harness(async()=>({ok:false}));h.get('show-why').listeners.click();h.get('next').listeners.click();assert.equal(h.get('evidence-tour').hidden,true);assert.equal(h.run('evidenceTour'),null);});

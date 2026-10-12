@@ -5,11 +5,13 @@ const matchesPreference=e=>($('favorite').value==='all'||e.team===$('favorite').
 let chatHistory=[],chatScope='';
 function chatMessage(role,text){const item=document.createElement('div');item.className='chat-message '+role;const label=document.createElement('strong'),body=document.createElement('p');label.textContent=(role==='user'?'You':'PRO-VISION')+' · '+events[index].id;body.sourceLabel=label;body.textContent=text;item.append(label,body);$('chat-messages').append(item);$('chat-messages').scrollTop=$('chat-messages').scrollHeight;return body;}
 $('chat-clear').addEventListener('click',()=>{stopDictation();chatHistory=[];$('chat-messages').replaceChildren();});
+let activeEvidence=[],evidenceTour=null;
 const time=second=>Math.floor(second/60)+':'+String(second%60).padStart(2,'0');
 const Recognition=globalThis.SpeechRecognition||globalThis.webkitSpeechRecognition;
 let dictation=null,dictationActive=false,dictationRevision=0;
 const symbols={pass:'↗',shot:'◎',tackle:'⇄',pressure:'◇'};
-function render() {
+function render(keepEvidenceTour=false) {
+  if(keepEvidenceTour!==true){evidenceTour=null;$('evidence-tour').hidden=true;}
   stopDictation();
   updateQuestionSuggestions();
   $('lens-results').hidden=true;
@@ -37,12 +39,12 @@ function findNextHighlight(type){return events.findIndex((e,i)=>i>index&&matches
 function jumpToHighlight(type){const next=findNextHighlight(type);if(next<0)return;stop();index=next;render();$('highlight-status').textContent=`Selected ${type}: ${events[index].id} at ${time(events[index].second)}.`;}
 $('next-shot').addEventListener('click',()=>jumpToHighlight('shot'));
 $('next-goal').addEventListener('click',()=>jumpToHighlight('goal'));
-function showEvidence(ids){$('evidence').replaceChildren(...ids.map(id=>{const button=document.createElement('button');button.className='evidence-link';button.textContent=id;button.setAttribute('aria-label','Inspect recorded event '+id);button.addEventListener('click',()=>{const target=events.findIndex(e=>e.id===id);if(target<0)return;stop();index=target;render();});return button;}));}
+function showEvidence(ids){activeEvidence=ids.filter(id=>events.some(e=>e.id===id&&e.second<=events[index].second));$('show-why').disabled=analyzing||!activeEvidence.length;$('evidence').replaceChildren(...ids.map(id=>{const button=document.createElement('button');button.className='evidence-link';button.textContent=id;button.setAttribute('aria-label','Inspect recorded event '+id);button.addEventListener('click',()=>{const target=events.findIndex(e=>e.id===id);if(target<0)return;stop();index=target;render();});return button;}));}
 function renderEvents(){const filter=$('filter').value,favorite=$('favorite').value;const filtered=events.map((e,i)=>({e,i})).filter(({e})=>matchesPreference(e)&&(filter==='all'||(filter==='key'?['shot','tackle'].includes(e.type):filter==='goal'?e.outcome==='goal':e.type===filter)));
   $('events').replaceChildren(...filtered.map(({e,i})=>{const button=document.createElement('button');button.setAttribute('aria-pressed',String(i===index));button.className='event-row'+(i===index?' current':'');const stamp=document.createElement('span'),details=document.createElement('span'),strong=document.createElement('strong'),small=document.createElement('small'),symbol=document.createElement('b');stamp.textContent=time(e.second);strong.textContent=e.player+' · '+e.type;small.textContent=e.team+' / '+e.outcome;symbol.textContent=symbols[e.type];details.append(strong,small);button.append(stamp,details,symbol);button.addEventListener('click',()=>{stop();index=i;render();});return button;}));
   if(!filtered.length)$('events').textContent='No events match these filters.';
 }
-function setAnalyzing(busy){analyzing=busy;$('chat-clear').disabled=busy;$('suggestion').disabled=busy;$('suggestion').textContent=busy?'Generating…':'Generate AI insight ↗';$('send-question').disabled=busy;$('dictate').disabled=busy||!Recognition||location.protocol==='file:';$('insight').setAttribute('aria-busy',String(busy));}
+function setAnalyzing(busy){analyzing=busy;$('show-why').disabled=busy||!activeEvidence.length;$('chat-clear').disabled=busy;$('suggestion').disabled=busy;$('suggestion').textContent=busy?'Generating…':'Generate AI insight ↗';$('send-question').disabled=busy;$('dictate').disabled=busy||!Recognition||location.protocol==='file:';$('insight').setAttribute('aria-busy',String(busy));}
 async function analyze(question=''){
   if(analyzing)return;
   stopDictation();
@@ -133,3 +135,10 @@ $('dictate').addEventListener('click',()=>{
  dictation.onend=()=>{if(token!==dictationRevision)return;dictationActive=false;$('dictate').textContent='🎙';$('dictate').setAttribute('aria-pressed','false');if($('dictation-status').textContent.startsWith('Listening'))$('dictation-status').textContent='Listening ended. Review the question or try again.';};
  try{dictationActive=true;$('dictate').textContent='Stop';$('dictate').setAttribute('aria-pressed','true');$('dictation-status').textContent='Listening… Speak your question. It will not send automatically.';dictation.start();}catch{dictationActive=false;$('dictate').textContent='🎙';$('dictate').setAttribute('aria-pressed','false');$('dictation-status').textContent='Could not start speech input. Try typing your question.';}
 });
+
+function drawEvidenceTour(){if(!evidenceTour)return;const event=events.find(e=>e.id===evidenceTour.ids[evidenceTour.step]);if(!event)return;$('evidence-tour').hidden=false;$('tour-original').textContent=`Explanation for ${evidenceTour.eventId} · ${evidenceTour.provider}`;$('tour-explanation').textContent=evidenceTour.text;$('tour-step').textContent=`RECORD ${evidenceTour.step+1} OF ${evidenceTour.ids.length}`;$('tour-title').textContent=`${event.id} · ${time(event.second)} · ${event.player}`;$('tour-facts').textContent=`${event.team}: ${event.type}, ${event.outcome}. Recorded ball coordinates: (${event.start.x}, ${event.start.y}) → (${event.end.x}, ${event.end.y}) on the 0–100 coordinate scale.`;$('tour-prev').disabled=evidenceTour.step===0;$('tour-next').disabled=evidenceTour.step===evidenceTour.ids.length-1;}
+$('show-why').addEventListener('click',()=>{if(analyzing||!activeEvidence.length)return;stop();evidenceTour={ids:[...activeEvidence],step:0,eventId:events[index].id,text:$('insight').textContent,provider:$('provider').textContent};drawEvidenceTour();$('evidence-tour').scrollIntoView?.({behavior:'smooth',block:'nearest'});});
+$('tour-prev').addEventListener('click',()=>{if(evidenceTour){evidenceTour.step=Math.max(0,evidenceTour.step-1);drawEvidenceTour();}});
+$('tour-next').addEventListener('click',()=>{if(evidenceTour){evidenceTour.step=Math.min(evidenceTour.ids.length-1,evidenceTour.step+1);drawEvidenceTour();}});
+$('tour-replay').addEventListener('click',()=>{if(!evidenceTour)return;const target=events.findIndex(e=>e.id===evidenceTour.ids[evidenceTour.step]);if(target<0)return;stop();index=target;render(true);drawEvidenceTour();$('pitch').scrollIntoView?.({behavior:'smooth',block:'center'});});
+$('tour-close').addEventListener('click',()=>{evidenceTour=null;$('evidence-tour').hidden=true;});
