@@ -97,3 +97,7 @@ test('trading memory freezes selected evidence and safely escapes personal conte
 test('fan and coach lenses differ in purpose across every action type',()=>{
  const events=generateMatch();for(const type of ['pass','shot','tackle','pressure']){const i=events.findIndex(e=>e.type===type),facts=interpret(events,i);const fan=explain(facts,'fan'),coach=explain(facts,'coach');assert.notEqual(fan,coach);assert.match(coach,/Coach review:/);assert.doesNotMatch(fan,/Coach review:/);assert.ok(fan.includes(facts.event.player));assert.ok(coach.includes(facts.event.player));}
 });
+
+test('hosted media policy allows local video previews without external media hosts',async()=>{
+ const res=await worker.fetch(new Request('https://provision.test/'));const policy=res.headers.get('content-security-policy');assert.match(policy,/media-src 'self' blob:/);assert.ok(!policy.includes("media-src *"));
+});
