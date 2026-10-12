@@ -4,10 +4,14 @@ for(const player of [...new Set(events.map(e=>e.player))]){const option=document
 const matchesPreference=e=>($('favorite').value==='all'||e.team===$('favorite').value)&&(!$('favorite-player').value||$('favorite-player').value==='all'||e.player===$('favorite-player').value);
 let chatHistory=[],chatScope='';
 function chatMessage(role,text){const item=document.createElement('div');item.className='chat-message '+role;const label=document.createElement('strong'),body=document.createElement('p');label.textContent=(role==='user'?'You':'PRO-VISION')+' · '+events[index].id;body.sourceLabel=label;body.textContent=text;item.append(label,body);$('chat-messages').append(item);$('chat-messages').scrollTop=$('chat-messages').scrollHeight;return body;}
-$('chat-clear').addEventListener('click',()=>{chatHistory=[];$('chat-messages').replaceChildren();});
+$('chat-clear').addEventListener('click',()=>{stopDictation();chatHistory=[];$('chat-messages').replaceChildren();});
 const time=second=>Math.floor(second/60)+':'+String(second%60).padStart(2,'0');
+const Recognition=globalThis.SpeechRecognition||globalThis.webkitSpeechRecognition;
+let dictation=null,dictationActive=false,dictationRevision=0;
 const symbols={pass:'↗',shot:'◎',tackle:'⇄',pressure:'◇'};
 function render() {
+  stopDictation();
+  updateQuestionSuggestions();
   $('lens-results').hidden=true;
   cancelCommentary();
   const facts=interpret(events,index),e=facts.event,stats=facts.stats;
@@ -38,9 +42,10 @@ function renderEvents(){const filter=$('filter').value,favorite=$('favorite').va
   $('events').replaceChildren(...filtered.map(({e,i})=>{const button=document.createElement('button');button.setAttribute('aria-pressed',String(i===index));button.className='event-row'+(i===index?' current':'');const stamp=document.createElement('span'),details=document.createElement('span'),strong=document.createElement('strong'),small=document.createElement('small'),symbol=document.createElement('b');stamp.textContent=time(e.second);strong.textContent=e.player+' · '+e.type;small.textContent=e.team+' / '+e.outcome;symbol.textContent=symbols[e.type];details.append(strong,small);button.append(stamp,details,symbol);button.addEventListener('click',()=>{stop();index=i;render();});return button;}));
   if(!filtered.length)$('events').textContent='No events match these filters.';
 }
-function setAnalyzing(busy){analyzing=busy;$('chat-clear').disabled=busy;$('suggestion').disabled=busy;$('suggestion').textContent=busy?'Generating…':'Generate AI insight ↗';$('ask-form').querySelector('button').disabled=busy;$('insight').setAttribute('aria-busy',String(busy));}
+function setAnalyzing(busy){analyzing=busy;$('chat-clear').disabled=busy;$('suggestion').disabled=busy;$('suggestion').textContent=busy?'Generating…':'Generate AI insight ↗';$('send-question').disabled=busy;$('dictate').disabled=busy||!Recognition||location.protocol==='file:';$('insight').setAttribute('aria-busy',String(busy));}
 async function analyze(question=''){
   if(analyzing)return;
+  stopDictation();
   const scope=JSON.stringify([index,mode,$('language').value,$('favorite').value,$('favorite-player').value]);if(chatScope!==scope){chatHistory=[];chatScope=scope;}
   const userQuestion=question.trim()||'Why might this moment matter?';
   chatMessage('user',userQuestion);const reply=chatMessage('assistant','Thinking…');$('question').value='';
@@ -110,3 +115,21 @@ $('card-flip').addEventListener('click',()=>{if(selectedCard){cardBack=!cardBack
 $('card-download').addEventListener('click',()=>{if(!selectedCard)return;const url=URL.createObjectURL(new Blob([tradingCardSVG(selectedCard,cardBack)],{type:'image/svg+xml'}));const link=document.createElement('a');link.href=url;link.download=`pro-vision-card-${selectedCard.eventId}-${cardBack?'back':'front'}.svg`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 $('card-replay').addEventListener('click',()=>{if(!selectedCard)return;stop();index=selectedCard.index;render();$('pitch').scrollIntoView?.({behavior:'smooth',block:'center'});$('card-status').textContent='Simulated tap reopened '+selectedCard.eventId+'. No physical tag was scanned.';});
 $('card-shirt-color').addEventListener('change',()=>{const color=$('card-shirt-color').value;$('card-shirt-body').setAttribute('fill',['#061225','#f1f5f9','#e8a28b'].includes(color)?color:'#061225');});
+
+function suggestedQuestions(){const es=$('language').value==='es',type=events[index].type;return es?['¿Qué ocurrió en este momento?','¿Por qué importa este '+({pass:'pase',shot:'tiro',tackle:'cambio de posesión',pressure:'evento de presión'}[type])+'?','¿Cuál es el marcador?','Explica eso de forma más sencilla.']:['What happened in this moment?','Why does this '+({pass:'pass',shot:'shot',tackle:'turnover',pressure:'pressure event'}[type])+' matter?','What is the score?','Explain that more simply.'];}
+function updateQuestionSuggestions(){const typed=$('question').value.trim().toLowerCase(),suggestions=suggestedQuestions();const matching=typed?suggestions.filter(q=>q.toLowerCase().includes(typed)):suggestions.slice(0,3);$('question-suggestions').replaceChildren(...matching.map(q=>{const button=document.createElement('button');button.type='button';button.textContent=q;button.addEventListener('click',()=>{$('question').value=q;$('question').focus?.();updateQuestionSuggestions();});return button;}));}
+$('question').addEventListener('input',updateQuestionSuggestions);
+$('start-experience').addEventListener('click',()=>{jumpToHighlight('shot');$('question').value=$('language').value==='es'?'¿Por qué importa este tiro?':'Why does this shot matter?';updateQuestionSuggestions();$('ask-form').scrollIntoView?.({behavior:'smooth',block:'center'});$('question').focus?.();});
+function stopDictation(){dictationRevision++;if(dictationActive&&dictation){dictationActive=false;dictation.abort();$('dictation-status').textContent='Speech input stopped. Review your text or type a question.';$('dictate').textContent='🎙';$('dictate').setAttribute('aria-pressed','false');}}
+$('dictate').disabled=!Recognition||location.protocol==='file:';
+if(!Recognition||location.protocol==='file:')$('dictation-status').textContent='Speech input is unavailable in this browser. Type your question instead.';
+else $('dictation-status').textContent='Microphone uses your browser’s speech service, which may process audio remotely. Review text before Send; no Azure transcription call.';
+$('dictate').addEventListener('click',()=>{
+ if(!Recognition||analyzing)return;
+ if(dictationActive){dictation.stop();return;}
+ stop();cancelCommentary();const token=++dictationRevision,baseText=$('question').value.trim();dictation=new Recognition();dictation.lang=$('language').value==='es'?'es-ES':'en-US';dictation.continuous=false;dictation.interimResults=false;
+ dictation.onresult=event=>{if(token!==dictationRevision)return;const transcript=Array.from(event.results).map(result=>result[0].transcript).join(' ').trim();$('question').value=(baseText+(baseText?' ':'')+transcript).slice(0,500);$('dictation-status').textContent='Voice added to your question. Review it, then select Send.';updateQuestionSuggestions();};
+ dictation.onerror=event=>{if(token!==dictationRevision)return;const messages={'not-allowed':'Microphone permission was denied. Allow it in browser settings or type instead.','audio-capture':'No microphone is available. Type your question instead.','no-speech':'No speech detected. Try again or type your question.','network':'The browser speech service is unavailable. Type your question instead.'};$('dictation-status').textContent=messages[event.error]||'Speech input stopped. You can type your question.';};
+ dictation.onend=()=>{if(token!==dictationRevision)return;dictationActive=false;$('dictate').textContent='🎙';$('dictate').setAttribute('aria-pressed','false');if($('dictation-status').textContent.startsWith('Listening'))$('dictation-status').textContent='Listening ended. Review the question or try again.';};
+ try{dictationActive=true;$('dictate').textContent='Stop';$('dictate').setAttribute('aria-pressed','true');$('dictation-status').textContent='Listening… Speak your question. It will not send automatically.';dictation.start();}catch{dictationActive=false;$('dictate').textContent='🎙';$('dictate').setAttribute('aria-pressed','false');$('dictation-status').textContent='Could not start speech input. Try typing your question.';}
+});

@@ -19,7 +19,7 @@ test('client makes no AI call on page load or event navigation and prevents doub
  let calls=0,resolve;
  const h=harness(async url=>{if(url==='/api/usage')return {ok:false};calls++;return await new Promise(r=>resolve=r);});
  h.get('next').listeners.click();assert.equal(calls,0);
- const first=h.run('analyze()');await h.run('analyze()');assert.equal(calls,1);assert.equal(h.get('ask-form').querySelector().disabled,true);
+ const first=h.run('analyze()');await h.run('analyze()');assert.equal(calls,1);assert.equal(h.get('send-question').disabled,true);
  resolve({ok:true,json:async()=>({provider:'azure',text:'Interpretation',evidence:['EV-002']})});await first;
  assert.equal(h.get('suggestion').disabled,false);assert.match(h.get('provider').textContent,/AZURE AI/);
 });
@@ -129,4 +129,22 @@ test('photo loading and video capture populate card artwork without uploads',asy
  h.get('card-media').files=[{type:'image/png',size:100}];await h.get('card-media').listeners.change();assert.equal(h.get('card-create').disabled,false);h.get('card-create').listeners.click();assert.match(h.get('card-art').innerHTML,/data:image\/jpeg;base64,AAAA/);
  Object.assign(h.get('card-video'),{readyState:2,videoWidth:1280,videoHeight:720,pause(){}});h.get('card-capture').listeners.click();h.get('card-create').listeners.click();assert.equal(h.run('selectedCard.mediaKind'),'video-frame');assert.equal(calls,0);
  h.get('card-media').files=[{type:'text/html',size:100}];await h.get('card-media').listeners.change();assert.match(h.get('card-status').textContent,/Choose a PNG/);
+});
+
+test('speech input fills editable text and never sends automatically',()=>{
+ let speech,calls=0;class Recognition{constructor(){speech=this;}start(){}stop(){this.onend();}abort(){this.aborted=true;}}
+ const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};},{SpeechRecognition:Recognition});
+ assert.equal(h.get('dictate').disabled,false);h.get('dictate').listeners.click();assert.equal(speech.lang,'en-US');assert.equal(h.get('dictate').attrs['aria-pressed'],'true');
+ speech.onresult({results:[[{transcript:'What is the score?'}]]});assert.equal(h.get('question').value,'What is the score?');assert.equal(calls,0);speech.onend();assert.equal(h.get('dictate').attrs['aria-pressed'],'false');
+ h.get('dictate').listeners.click();const old=speech;h.get('next').listeners.click();assert.equal(old.aborted,true);old.onresult({results:[[{transcript:'Stale speech'}]]});assert.notEqual(h.get('question').value,'Stale speech');
+});
+test('speech permission errors and unsupported browsers retain typing fallback',()=>{
+ let speech;class Recognition{constructor(){speech=this;}start(){}abort(){}}
+ const h=harness(async()=>({ok:false}),{SpeechRecognition:Recognition});h.get('dictate').listeners.click();speech.onerror({error:'not-allowed'});assert.match(h.get('dictation-status').textContent,/permission was denied/);speech.onend();assert.equal(h.get('dictate').attrs['aria-pressed'],'false');
+ const unsupported=harness(async()=>({ok:false}));assert.equal(unsupported.get('dictate').disabled,true);assert.match(unsupported.get('dictation-status').textContent,/Type your question/);
+});
+test('first-visit guide and question suggestions help without automatic model calls',()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});
+ h.get('start-experience').listeners.click();assert.equal(h.run('events[index].type'),'shot');assert.match(h.get('question').value,/shot/);assert.equal(calls,0);
+ h.get('question').value='score';h.get('question').listeners.input();const chips=h.get('question-suggestions').children;assert.equal(chips.length,1);chips[0].listeners.click();assert.equal(h.get('question').value,'What is the score?');assert.equal(calls,0);
 });
