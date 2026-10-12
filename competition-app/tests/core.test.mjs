@@ -101,3 +101,7 @@ test('fan and coach lenses differ in purpose across every action type',()=>{
 test('hosted media policy allows local video previews without external media hosts',async()=>{
  const res=await worker.fetch(new Request('https://provision.test/'));const policy=res.headers.get('content-security-policy');assert.match(policy,/media-src 'self' blob:/);assert.ok(!policy.includes("media-src *"));
 });
+
+test('brand and loading module routes are served for hosted startup',async()=>{
+ const brand=await worker.fetch(new Request('https://provision.test/brand.svg'));assert.equal(brand.status,200);assert.match(brand.headers.get('content-type'),/image\/svg/);const boot=await worker.fetch(new Request('https://provision.test/bootstrap.js'));assert.equal(boot.status,200);assert.match(await boot.text(),/loading-screen/);
+});
