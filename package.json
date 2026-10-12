@@ -4,15 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
-    "build": "node scripts/build.mjs",
+    "test": "npm test --prefix competition-app",
+    "build": "npm run build --prefix competition-app",
     "build:pages": "node scripts/build.mjs && node scripts/pages.mjs",
-    "dev": "node --env-file-if-exists=.env server.mjs",
+    "dev": "node --env-file-if-exists=.env competition-app/scripts/dev.mjs",
     "dev:ai": "node --env-file-if-exists=.env server.mjs --ai",
     "ai:setup": "node node_modules/foundry-local-sdk/script/install-native.cjs",
     "build:offline": "node scripts/offline.mjs",
     "preview:ai": "node scripts/local-ai-preview.mjs",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "legacy:dev": "node --env-file-if-exists=.env server.mjs",
+    "legacy:dev:ai": "node --env-file-if-exists=.env server.mjs --ai",
+    "legacy:build": "node scripts/build.mjs",
+    "legacy:test": "node --test tests/*.test.mjs",
+    "legacy:build:pages": "node scripts/build.mjs && node scripts/pages.mjs",
+    "legacy:build:offline": "node scripts/offline.mjs",
+    "start": "node competition-app/scripts/dev.mjs",
+    "validate": "npm run validate --prefix competition-app"
   },
   "devDependencies": {
     "foundry-local-sdk": "2.1.0"

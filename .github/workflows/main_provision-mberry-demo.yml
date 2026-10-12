@@ -1,54 +1,53 @@
-name: Deploy consolidated PRO-VISION to Azure
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy Node.js app to Azure Web App - provision-mberry-demo
+
 on:
   push:
-    branches: [main]
-    paths: ['competition-app/**', '.github/workflows/main_provision-mberry-demo.yml']
+    branches:
+      - 'main'
   workflow_dispatch:
-permissions:
-  contents: read
-concurrency:
-  group: provision-azure-production
-  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: competition-app
+    permissions:
+      contents: read #This is required for actions/checkout
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
         with:
           node-version: '24.x'
-      - name: Build and test complete app
+
+      - name: npm install, build, and test
         run: |
-          npm ci --omit=dev --ignore-scripts
-          npm run build
-          npm test
-          npm run validate
-      - name: Package runtime without secrets
-        run: |
-          mkdir -p deploy-app/scripts deploy-app/worker
-          cp package.json deploy-app/
-          cp scripts/dev.mjs scripts/usage-guard.mjs deploy-app/scripts/
-          cp worker/index.js deploy-app/worker/
-          cd deploy-app
-          zip -r ../provision-app.zip .
-      - uses: actions/upload-artifact@v4
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: competition-app/provision-app.zip
-          if-no-files-found: error
+          path: .
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write
-      contents: read
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
         with:
           name: node-app
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -56,14 +55,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FF0DF89B3C8A4A029A4B6D75F6F34AB4 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_35F8AE677FB54457B2B8AB697C9ED028 }}
 
-      - name: Configure startup and bounded usage
-        uses: azure/cli@v2
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
-          inlineScript: |
-            az webapp config set --resource-group rg-mberry19932025-4332 --name provision-mberry-demo --startup-file "npm start" --output none
-            az webapp config appsettings set --resource-group rg-mberry19932025-4332 --name provision-mberry-demo --settings HOST=0.0.0.0 PORT=8080 PROVISION_AI_DAILY_LIMIT=20 PROVISION_AI_MONTHLY_LIMIT=100 SCM_DO_BUILD_DURING_DEPLOYMENT=false --output none
-      - uses: azure/webapps-deploy@v3
-        with:
-          app-name: provision-mberry-demo
-          slot-name: Production
-          package: provision-app.zip
+          app-name: 'provision-mberry-demo'
+          slot-name: 'Production'
+          package: .
+          
