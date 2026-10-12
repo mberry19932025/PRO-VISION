@@ -115,3 +115,8 @@ Final checks reject known unrelated claims and require attacking-progress releva
 ## Focused editor trial
 
 `evaluation/focused-editor-trial.json` records a narrower draft-editing task: fan pass 20.311 s fell back, goal 3.674 s, Spanish pass 4.808 s and broadcast pass 2.919 s returned checked AI. Human review found the Spanish text coherent, broadcast concise and tentative, and goal text unnecessarily hedged a known score change. Accordingly the final routing retains the earlier English fan/goal prompt, and uses the editor task for broadcast/Spanish. This four-request trial does not establish general consistency, nor is it a benchmark of the final hybrid routing. The fan pass remains a reliability limitation. 35 automated checks pass.
+
+
+## Azure backend preparation — October 11
+
+39 automated checks pass. Four new adapter checks cover complete configuration, Microsoft-host allowlisting, bounded requests, daily attempt counts, UTC reset and malformed-response handling. Requests are mocked; no live Azure model, account upgrade or backend deployment was performed. The per-process daily allowance includes failed attempts and repairs, resets on restart, and does not impose an Azure billing cap. The local test-build prerelease remains pinned to its earlier source commit and test results.

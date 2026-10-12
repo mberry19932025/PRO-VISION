@@ -1,21 +1,20 @@
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {createAnalyzer,validateRequest} from './src/api.js';
+import {createAzureGenerator} from './src/azure-generator.mjs';
 const port=Number(process.env.PORT||4180),host=process.env.HOST||'127.0.0.1';
 if(!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid PORT');
-const publicOrigin=process.env.PUBLIC_ORIGIN?new URL(process.env.PUBLIC_ORIGIN).origin:null;
+const publicOrigin=(process.env.PUBLIC_ORIGIN||process.env.RENDER_EXTERNAL_URL)?new URL(process.env.PUBLIC_ORIGIN||process.env.RENDER_EXTERNAL_URL).origin:null;
 if(publicOrigin&&!publicOrigin.startsWith('https://'))throw new Error('PUBLIC_ORIGIN must use HTTPS');
 const allowedOrigins=new Set(publicOrigin?[publicOrigin]:[`http://localhost:${port}`,`http://127.0.0.1:${port}`]);
 let activeRequests=0;const calls=[];
-let generate=null,provider=null,modelId=null,close=async()=>{};
+let generate=null,provider=null,modelId=null,cloud=null,close=async()=>{};
 if(process.argv.includes('--ai')){
  const {createLocalGenerator}=await import('./src/local-generator.mjs');
  const local=await createLocalGenerator();generate=local.generate;close=local.close;provider='foundry-local';modelId=local.modelId;
  console.log('Microsoft model loaded:',modelId);
-}else if(process.env.AZURE_OPENAI_ENDPOINT&&process.env.AZURE_OPENAI_API_KEY&&process.env.AZURE_OPENAI_DEPLOYMENT){
- const endpoint=new URL(process.env.AZURE_OPENAI_ENDPOINT);
- if(endpoint.protocol!=='https:'||!/(^|\.)(openai\.azure\.com|services\.ai\.azure\.com)$/.test(endpoint.hostname))throw new Error('Unsupported Azure endpoint');
- provider='azure';generate=async messages=>{const r=await fetch(endpoint.origin+'/openai/v1/chat/completions',{method:'POST',headers:{'content-type':'application/json','api-key':process.env.AZURE_OPENAI_API_KEY},body:JSON.stringify({model:process.env.AZURE_OPENAI_DEPLOYMENT,messages,max_tokens:220,temperature:.1}),signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error('Provider failed');return (await r.json()).choices?.[0]?.message?.content??'';};
+}else{
+ cloud=createAzureGenerator(process.env);if(cloud){provider='azure';generate=cloud.generate;modelId=process.env.AZURE_OPENAI_DEPLOYMENT;}
 }
 const analyzeRequest=createAnalyzer(generate,provider);
 const assets=new Map([['/','index.html'],['/style.css','style.css'],...['events.js','stories.js','memories.js','workflow.js','app.js'].map(f=>['/src/'+f,'src/'+f])]);
@@ -23,7 +22,7 @@ const server=http.createServer(async(req,res)=>{
  const json=(status,data)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(data));};
  try{
   const pathname=new URL(req.url,'http://localhost:4180').pathname;
-  if(pathname==='/api/health'&&req.method==='GET'){json(200,{ai:!!generate,provider,modelId});return;}
+  if(pathname==='/api/health'&&req.method==='GET'){json(200,{ai:!!generate,provider,modelId,cloudUsage:cloud?.usage??null});return;}
   if(pathname==='/api/story'&&req.method==='POST'){
    if(req.headers.origin&&!allowedOrigins.has(req.headers.origin)){json(403,{error:'Origin rejected'});return;}
    let length=0;const chunks=[];for await(const chunk of req){length+=chunk.length;if(length>4096){json(413,{error:'Request too large'});return;}chunks.push(chunk);}

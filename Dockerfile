@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim
+FROM node:24-bookworm-slim
 WORKDIR /app
 COPY package.json ./
 # Hosted mode calls Azure; it does not install the native local-model SDK.

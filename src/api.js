@@ -27,7 +27,7 @@ async function analyzeCore(data,generate,provider){
   }
   const elapsedMs=Math.round(performance.now()-start);
   return result.ok?{story:{...base,interpretation:result.insight,evidence:result.evidence,provider,evidenceOrigin:result.evidenceOrigin||'model-selected'},notice:`AI interpretation · ${(elapsedMs/1000).toFixed(1)}s · references passed basic checks. Interpretations still need human review.`,elapsedMs,trace}:{story:base,notice:`AI output failed basic checks after ${trace.length} attempts. Showing the computed explanation.`,elapsedMs,trace};
- }catch(error){return {story:base,notice:error?.message==='Generation deadline'?'AI generation exceeded its response deadline. Showing the computed explanation.':'Microsoft AI is unavailable or busy. Showing the computed explanation.',elapsedMs:Math.round(performance.now()-start)};}
+ }catch(error){return {story:base,notice:error?.code==='DAILY_LIMIT'?'The server reached its daily AI request allowance. Showing the computed explanation.':error?.message==='Generation deadline'?'AI generation exceeded its response deadline. Showing the computed explanation.':'Microsoft AI is unavailable or busy. Showing the computed explanation.',elapsedMs:Math.round(performance.now()-start)};}
 }
 
 export async function analyze(data,generate,provider){
