@@ -5,7 +5,7 @@ https://provision-mberry-demo-h4b4bjh7fpapcgfp.westus3-01.azurewebsites.net/
 
 ## Verified
 
-68 automated tests pass. Checks cover replay, filters, conversation history, stale responses, fan/coach lenses, English/Spanish narratives and recaps, microphone fallbacks, memory media, card exports, evidence tours, app navigation, startup recovery, validation and persistent quotas. Build and artifact validation pass. Browser API tests use substitutes; they do not establish real phone microphone or video compatibility.
+70 automated tests pass. Checks cover replay, filters, conversation history, stale responses, fan/coach lenses, English/Spanish narratives and recaps, microphone fallbacks, memory media, card exports, evidence tours, app navigation, startup recovery, validation and persistent quotas. Build and artifact validation pass. Browser API tests use substitutes; they do not establish real phone microphone or video compatibility.
 
 The hosted usage endpoint responds. This review made no paid model requests. Its observed allowance was 20 attempts per UTC day and 100 per UTC month, with 6 monthly attempts consumed. Counts can change after this check. Hosting is the configured Free F1 plan; AI inference has separate usage costs. Request limits are not a dollar spending ceiling.
 
@@ -28,3 +28,7 @@ Credits expire November 4, 2026, before judging ends. Confirm continued access a
 ## October 13 memory section repair
 
 Creation brings the preview into view and focuses it. Media loading has a timeout and handles aborted readers, missing MIME types and invalid dimensions. An unplayable video releases its URL and no longer traps creation behind an impossible frame-selection requirement. PNG export has a recoverable SVG fallback; names/notes retain complete emoji at truncation boundaries. Long AI replies are bounded in follow-up history to the API limit. These changes use no additional Azure model calls. Live browser and phone compatibility remain unverified because no browser connection is available.
+
+## First-time conversation flow
+
+Three entry points explain the journey: explore a moment, ask about a play, or make a memory card. Chat retains the pitch as context and offers explicit follow-up prompts after replies. Evidence and Keep this moment actions link the conversation to records and Studio. Prompts fill the composer and require Send; they do not create automatic Azure requests. On a selected shot, entering the conversation retains that event. The existing demo video is genuine footage recorded before these interface refinements.

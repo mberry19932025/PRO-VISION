@@ -5,7 +5,7 @@ for(const player of [...new Set(events.map(e=>e.player))]){const option=document
 const matchesPreference=e=>($('favorite').value==='all'||e.team===$('favorite').value)&&(!$('favorite-player').value||$('favorite-player').value==='all'||e.player===$('favorite-player').value);
 let chatHistory=[],chatScope='';
 function chatMessage(role,text){const item=document.createElement('div');item.className='chat-message '+role;const label=document.createElement('strong'),body=document.createElement('p');label.textContent=(role==='user'?'You':'PRO-VISION')+' · '+events[index].id;body.sourceLabel=label;body.textContent=text;item.append(label,body);$('chat-messages').append(item);$('chat-messages').scrollTop=$('chat-messages').scrollHeight;return body;}
-$('chat-clear').addEventListener('click',()=>{stopDictation();chatHistory=[];$('chat-messages').replaceChildren();});
+$('chat-clear').addEventListener('click',()=>{stopDictation();chatHistory=[];$('chat-messages').replaceChildren();$('followup-suggestions').replaceChildren();});
 let activeEvidence=[],evidenceTour=null;
 const time=second=>Math.floor(second/60)+':'+String(second%60).padStart(2,'0');
 const Recognition=globalThis.SpeechRecognition||globalThis.webkitSpeechRecognition;
@@ -14,7 +14,7 @@ const symbols={pass:'↗',shot:'◎',tackle:'⇄',pressure:'◇'};
 function render(keepEvidenceTour=false) {
   if(keepEvidenceTour!==true){evidenceTour=null;$('evidence-tour').hidden=true;}
   stopDictation();
-  updateQuestionSuggestions();
+  updateQuestionSuggestions();$('followup-suggestions').replaceChildren();
   $('lens-results').hidden=true;
   cancelCommentary();
   const facts=interpret(events,index),e=facts.event,stats=facts.stats;
@@ -51,8 +51,8 @@ async function analyze(question=''){
   stopDictation();
   const scope=JSON.stringify([index,mode,$('language').value,$('favorite').value,$('favorite-player').value]);if(chatScope!==scope){chatHistory=[];chatScope=scope;}
   const userQuestion=question.trim()||'Why might this moment matter?';
-  chatMessage('user',userQuestion);const reply=chatMessage('assistant','Thinking…');$('question').value='';
-  const remember=(text,provider='local')=>{reply.textContent=text;reply.sourceLabel.textContent='PRO-VISION · '+events[index].id+' · '+(provider==='azure'?'AZURE AI':provider==='foundry-local'?'LOCAL AI':'RECORDED / RULE-BASED');chatHistory.push({role:'user',content:userQuestion.slice(0,2000)},{role:'assistant',content:text.slice(0,2000)});chatHistory=chatHistory.slice(-4);};
+  $('chat-messages').querySelector('.chat-welcome')?.remove();chatMessage('user',userQuestion);const reply=chatMessage('assistant','Thinking…');$('question').value='';updateQuestionSuggestions();
+  const remember=(text,provider='local')=>{reply.textContent=text;reply.sourceLabel.textContent='PRO-VISION · '+events[index].id+' · '+(provider==='azure'?'AZURE AI':provider==='foundry-local'?'LOCAL AI':'RECORDED / RULE-BASED');chatHistory.push({role:'user',content:userQuestion.slice(0,2000)},{role:'assistant',content:text.slice(0,2000)});chatHistory=chatHistory.slice(-4);showFollowups();};
   const schedule=fixtureAnswer(question);if(schedule){remember(schedule.text);$('insight').textContent=schedule.text;$('provider').textContent='DEMO FIXTURES · NO AI REQUEST';showEvidence([]);$('notice').textContent='Open Matchday to browse these fictional fixtures.';return;}
   const direct=recordedAnswer(interpret(events,index),question,$('language').value);
   if(direct){remember(direct.text);$('insight').textContent=direct.text;$('provider').textContent='RECORDED FACTS · NO AI REQUEST';showEvidence(direct.evidence);$('notice').textContent='Answered directly from the event record.';return;}
@@ -138,8 +138,15 @@ $('card-shirt-color').addEventListener('change',()=>{const color=$('card-shirt-c
 
 function suggestedQuestions(){const es=$('language').value==='es',type=events[index].type;return es?['¿Qué ocurrió en este momento?','¿Por qué importa este '+({pass:'pase',shot:'tiro',tackle:'cambio de posesión',pressure:'evento de presión'}[type])+'?','¿Cuál es el marcador?','Explica eso de forma más sencilla.']:['What happened in this moment?','Why does this '+({pass:'pass',shot:'shot',tackle:'turnover',pressure:'pressure event'}[type])+' matter?','What is the score?',`How is ${events[index].player} doing so far?`,'Explain that more simply.'];}
 function updateQuestionSuggestions(){const typed=$('question').value.trim().toLowerCase(),suggestions=suggestedQuestions();const matching=typed?suggestions.filter(q=>q.toLowerCase().includes(typed)):suggestions.slice(0,4);$('question-suggestions').replaceChildren(...matching.map(q=>{const button=document.createElement('button');button.type='button';button.textContent=q;button.addEventListener('click',()=>{$('question').value=q;$('question').focus?.();updateQuestionSuggestions();});return button;}));}
+function showFollowups(){
+ const es=$('language').value==='es',player=events[index].player;
+ const questions=es?['Explica eso de forma más sencilla.',`Estadísticas de ${player}`]:['Explain that more simply.',`How is ${player} doing so far?`];
+ $('followup-suggestions').replaceChildren(...questions.map(question=>{const button=document.createElement('button');button.type='button';button.textContent=question;button.addEventListener('click',()=>{$('question').value=question;updateQuestionSuggestions();$('ask-form').scrollIntoView?.({behavior:'smooth',block:'center'});$('question').focus?.();});return button;}));
+}
+$('explore-moment').addEventListener('click',()=>{selectScreen('match');jumpToHighlight('shot');$('pitch').scrollIntoView?.({behavior:'smooth',block:'center'});});
+for(const id of ['make-memory','keep-moment'])$(id).addEventListener('click',()=>selectScreen('studio'));
 $('question').addEventListener('input',updateQuestionSuggestions);
-$('start-experience').addEventListener('click',()=>{selectScreen('chat');jumpToHighlight('shot');$('question').value=$('language').value==='es'?'¿Por qué importa este tiro?':'Why does this shot matter?';updateQuestionSuggestions();$('ask-form').scrollIntoView?.({behavior:'smooth',block:'center'});$('question').focus?.();});
+$('start-experience').addEventListener('click',()=>{selectScreen('chat');if(events[index].type!=='shot')jumpToHighlight('shot');$('question').value=$('language').value==='es'?'¿Por qué importa este tiro?':'Why does this shot matter?';updateQuestionSuggestions();$('ask-form').scrollIntoView?.({behavior:'smooth',block:'center'});$('question').focus?.();});
 function stopDictation(){dictationRevision++;if(dictationActive&&dictation){dictationActive=false;dictation.abort();$('dictation-status').textContent='Speech input stopped. Review your text or type a question.';$('dictate').textContent='🎙';$('dictate').setAttribute('aria-pressed','false');}}
 $('dictate').disabled=!Recognition||location.protocol==='file:';
 if(!Recognition||location.protocol==='file:')$('dictation-status').textContent='Speech input is unavailable in this browser. Type your question instead.';
@@ -162,7 +169,7 @@ $('tour-replay').addEventListener('click',()=>{if(!evidenceTour)return;const tar
 $('tour-close').addEventListener('click',()=>{evidenceTour=null;$('evidence-tour').hidden=true;});
 
 let currentScreen='match';
-function selectScreen(screen){if(!['matchday','match','chat','studio','about'].includes(screen))return;stop();stopDictation();currentScreen=screen;$('app-shell').setAttribute('data-screen',screen);$('match-view').hidden=!['match','chat'].includes(screen);$('memory-studio').hidden=screen!=='studio';$('about').hidden=screen!=='about';$('matchday-view').hidden=screen!=='matchday';const titles={matchday:['Matchday','Fictional fixtures. Your teams. A match you can explore.'],match:['Match room','Explore a moment. Ask why it matters. Keep your story.'],chat:['Football conversation','Talk to the selected moment. Inspect the evidence behind every explanation.'],studio:['Memory studio','Your photo. Your story. A card connected to the match.'],about:['How PRO-VISION works','Recorded facts, tentative AI interpretations, and personal memories.']};$('screen-title').textContent=titles[screen][0];$('screen-description').textContent=titles[screen][1];globalThis.scrollTo?.({top:0,behavior:'smooth'});for(const key of ['matchday','match','chat','studio','about'])$('nav-'+key).setAttribute('aria-pressed',String(key===screen));}
+function selectScreen(screen){if(!['matchday','match','chat','studio','about'].includes(screen))return;stop();stopDictation();currentScreen=screen;$('app-shell').setAttribute('data-screen',screen);$('match-view').hidden=!['match','chat'].includes(screen);$('memory-studio').hidden=screen!=='studio';$('about').hidden=screen!=='about';$('matchday-view').hidden=screen!=='matchday';const titles={matchday:['Matchday','Fictional fixtures. Your teams. A match you can explore.'],match:['Match room','Understand the play. Ask why. Keep the memory.'],chat:['What do you want to know?','Ask about the play beside you, then keep the conversation going.'],studio:['Memory studio','Your photo. Your story. A card connected to the match.'],about:['How PRO-VISION works','Recorded facts, tentative AI interpretations, and personal memories.']};$('screen-title').textContent=titles[screen][0];$('screen-description').textContent=titles[screen][1];globalThis.scrollTo?.({top:0,behavior:'smooth'});for(const key of ['matchday','match','chat','studio','about'])$('nav-'+key).setAttribute('aria-pressed',String(key===screen));}
 for(const key of ['matchday','match','chat','studio','about'])$('nav-'+key).addEventListener('click',()=>selectScreen(key));
 
 $('brand-home').addEventListener('click',event=>{event.preventDefault();selectScreen('match');});

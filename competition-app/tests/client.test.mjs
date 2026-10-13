@@ -222,3 +222,18 @@ test('long model replies stay within the follow-up API history limit',async()=>{
  const requests=[];const h=harness(async(url,opts)=>{if(url==='/api/usage')return {ok:false};requests.push(JSON.parse(opts.body));return {ok:true,json:async()=>({text:'a'.repeat(2500),provider:'azure',evidence:['EV-001']})};});
  await h.run("analyze('Why does this moment matter?')");await h.run("analyze('Explain that more simply')");assert.equal(requests[1].history[1].content.length,2000);assert.equal(h.get('insight').textContent.length,2500);
 });
+
+test('first-time entry points and keep-moment action form a free connected journey',()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});
+ h.get('explore-moment').listeners.click();assert.equal(h.run('events[index].type'),'shot');assert.equal(h.get('app-shell').attrs['data-screen'],'match');const selected=h.run('index');
+ h.get('start-experience').listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'chat');assert.match(h.get('question').value,/shot/);assert.equal(h.run('index'),selected);
+ const moment=h.run('index');h.get('keep-moment').listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'studio');assert.equal(h.run('index'),moment);
+ h.get('card-create').listeners.click();assert.equal(h.run('selectedCard.index'),moment);h.get('card-replay').listeners.click();assert.equal(h.run('index'),moment);assert.equal(calls,0);
+});
+
+test('follow-up suggestions fill the composer without automatic calls and clear on moment changes',async()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});
+ await h.run("analyze('What happened in this moment?')");const buttons=h.get('followup-suggestions').children;assert.equal(buttons.length,2);buttons[0].listeners.click();assert.equal(h.get('question').value,'Explain that more simply.');assert.equal(calls,0);
+ h.get('next').listeners.click();assert.equal(h.get('followup-suggestions').children.length,0);
+ await h.run("analyze('What is the score?')");h.get('chat-clear').listeners.click();assert.equal(h.get('followup-suggestions').children.length,0);assert.equal(h.get('chat-messages').children.length,0);
+});
