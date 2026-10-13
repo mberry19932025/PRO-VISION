@@ -8,7 +8,7 @@ Official rules: https://github.com/microsoft/insidethegamehackathon/blob/main/OF
 - [x] Automated regression tests, build and artifact checks.
 - [x] Pitch and architecture describe implemented features and limits.
 - [ ] Owner completes registration by October 20, 2 pm Chicago, and confirms eligibility/ownership/agreement.
-- [ ] Final new Match Director workflow verified on the deployed app.
+- [x] Final new Match Director workflow verified on the deployed app, including cached repeat.
 - [ ] Real desktop/phone checks of layout, microphone, video frame capture, downloads and navigation.
 - [ ] Public demo video under two minutes on an accepted video host; existing private edit is not a public submission URL.
 - [ ] Confirm free judge access through November 11, 1:59 am Chicago. Credits expire November 4; development quotas can restrict shared AI access.

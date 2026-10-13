@@ -5,7 +5,7 @@ https://provision-mberry-demo-h4b4bjh7fpapcgfp.westus3-01.azurewebsites.net/
 
 ## Verified
 
-83 automated tests pass. Checks cover replay, filters, conversation history, stale responses, fan/coach lenses, English/Spanish narratives and recaps, microphone fallbacks, memory media, card exports, evidence tours, app navigation, startup recovery, validation and persistent quotas. Build and artifact validation pass. Browser API tests use substitutes; they do not establish real phone microphone or video compatibility.
+84 automated tests pass. Checks cover replay, filters, conversation history, stale responses, fan/coach lenses, English/Spanish narratives and recaps, microphone fallbacks, memory media, card exports, evidence tours, app navigation, startup recovery, validation and persistent quotas. Build and artifact validation pass. Browser API tests use substitutes; they do not establish real phone microphone or video compatibility.
 
 The hosted usage endpoint responds. This review made no paid model requests. Its observed allowance was 20 attempts per UTC day and 100 per UTC month, with usage counts available from /api/usage. Counts can change after this check. Hosting is the configured Free F1 plan; AI inference has separate usage costs. Request limits are not a dollar spending ceiling.
 
@@ -36,3 +36,7 @@ Three entry points explain the journey: explore a moment, ask about a play, or m
 ## Chat-first opening
 
 The default and brand-home destination is Chat. A large composer and suggested prompts lead the page; personalization is in an expandable section. The play preview is compact and the full Match room is available through navigation or View selected play. Choosing a shot preserves a selected shot or finds a matching one, including from the end of the replay. Startup, suggestions and navigation make no automatic model requests. The existing video predates this layout change; no new UI recording is fabricated.
+
+## Final hosted check — October 13
+
+Chat-first HTML and report/Director client markers are served by the public Azure app. Health reports Azure configuration. A real Match Director request performed tool selection and an evidence-checked explanation in 3.8 seconds; its cached repeat consumed no new attempt. Usage advanced from 11 to 13 monthly attempts (5 to 7 today), with limits unchanged at 20/day and 100/month. Local HTTP checks passed with a corrupt ledger, which stayed unchanged while cloud requests remained disabled. 40 archived tests also passed. These checks do not verify the actual dollar balance or real phone compatibility.

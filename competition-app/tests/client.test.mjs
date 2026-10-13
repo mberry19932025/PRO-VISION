@@ -267,3 +267,9 @@ test('director response selects its recorded event, displays honest tool trace a
  finish({ok:true,json:async()=>({index:9,text:'Recorded shot. This may matter.',provider:'azure',workflow:'tool-using',evidence:['EV-010'],trace:[{step:'find_key_moment'},{step:'inspect_evidence'}]})});await pending;
  assert.equal(h.run('index'),9);assert.equal(h.get('director-trace').hidden,false);assert.match(h.get('director-trace').textContent,/Azure tool workflow/);assert.equal(h.get('director').disabled,false);
 });
+test('director cannot navigate to future events or display malformed provider text',async()=>{
+ for(const result of [{index:179,text:'Future answer',evidence:['EV-180'],trace:[]},{index:0,text:null,evidence:['EV-001'],trace:[]}]){
+  const h=harness(async url=>url==='/api/usage'?{ok:false}:{ok:true,json:async()=>({...result,provider:'azure'})});
+  await h.run("analyze('Find a key moment so far.',true)");assert.equal(h.run('index'),0);assert.match(h.get('provider').textContent,/LOCAL EXPLANATION/);assert.match(h.get('notice').textContent,/unavailable/);assert.equal(h.get('director').disabled,false);
+ }
+});

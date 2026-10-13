@@ -8,7 +8,7 @@
     "build": "npm run build --prefix competition-app",
     "build:pages": "node scripts/build.mjs && node scripts/pages.mjs",
     "dev": "node --env-file-if-exists=.env competition-app/scripts/dev.mjs",
-    "dev:ai": "node --env-file-if-exists=.env server.mjs --ai",
+    "dev:ai": "node --env-file-if-exists=.env competition-app/scripts/dev.mjs --foundry",
     "ai:setup": "node node_modules/foundry-local-sdk/script/install-native.cjs",
     "build:offline": "node scripts/offline.mjs",
     "preview:ai": "node scripts/local-ai-preview.mjs",
