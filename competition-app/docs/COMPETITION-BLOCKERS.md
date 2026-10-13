@@ -1,23 +1,20 @@
-# Competition readiness — checked October 12, 2026
+# Competition readiness — October 12, 2026
 
-Official source: https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md
+Official rules: https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md
 
-Rules require a public source repository, a functioning judge-accessible website/demo/test build, an English pitch describing the actual technologies, and a public video shorter than two minutes. Registration ends October 20 at 2 p.m. Chicago; submission ends October 28 at 1:59 a.m. Chicago; judging ends November 11 at 1:59 a.m. Chicago. Confirm eligibility and category before submitting.
+## Technical blockers resolved
 
-## Outstanding blockers
+The submitted implementation is consolidated in `competition-app/`. GitHub main builds and starts it through the repository's package scripts. Public Azure hosting and a server-side model connection are configured. The public app and usage endpoint are available; live Azure inference was verified in the preceding deployment work. Keys stay in server environment settings.
 
-- Registration/eligibility have not been verified.
-- Main app and GitHub entry are separate implementations. Select and consolidate the submitted build before describing all features as one product.
-- Main app's latest source is local. GitHub entry has an origin configured, but its latest edits have not been pushed. Public repository availability was not independently verified during this review.
-- Public hosting and judge access to live AI are not configured here. Browser connection and Azure/GitHub publishing credentials are unavailable.
-- Azure credits expire November 4, before judging ends. Continued paid usage and a suitable judge-access plan must be arranged. The development request cap cannot be described as unrestricted judge access.
-- Public demo video and final English pitch remain to be produced.
-- Fresh visual/mobile browser checks remain pending.
+## Remaining owner actions
 
-## Positioning recommendation
+- Verify registration, eligibility and the selected competition category.
+- Produce and publish an English demo video shorter than two minutes, then submit the actual app and repository links.
+- Confirm service access beyond the November 4 credit expiry through the end of judging, and choose a judge-access allowance consistent with the rules and budget.
+- Perform real phone checks for microphone permissions, media compatibility, downloads and layout.
 
-Demonstrate conversational, evidence-linked football explanations; personalization by player/team/language; the same recorded moment in fan and coach lenses; and honest fallback under provider constraints. Explain the simulated clothing keepsake as a separate concept. Do not claim physical tags, video recognition, verified player intent, autonomous multi-agent orchestration, or guaranteed accuracy. This is a differentiated product direction, not a claim of uniqueness or likely victory.
+Registration ends October 20 at 2 p.m. Chicago; submission ends October 28 at 1:59 a.m. Chicago; judging ends November 11 at 1:59 a.m. Chicago, according to the rules reviewed earlier. Recheck the official rules before submission.
 
-## Verified this turn
+## Accurate positioning
 
-Main app: player-following controls and highlight logic, viewing preferences supplied to AI, two-lens comparison without paid calls, and export regression checks. GitHub version: GPT-5-compatible Azure parameters and a persistent quota hook wired into its server. Changes are local; no publication or submission occurred.
+Demonstrate conversational football explanations, inspectable event evidence, fan/coach lenses and a personal photo/video-frame memory card. The events are synthetic, explanations are interpretations, and the garment/tap is a concept. No physical NFC integration or automatic video recognition is implemented.

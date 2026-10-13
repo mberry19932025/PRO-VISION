@@ -4,7 +4,7 @@ An independent association-football intelligence prototype using original synthe
 
 ## Run
 
-Requires Node 22+; no third-party runtime dependencies.
+Requires Node 24+. Foundry Local is optional; hosted Azure inference uses the server adapter.
 
 ```sh
 npm run build
@@ -21,11 +21,11 @@ For an immediate offline preview, open `output/PRO-VISION-AI-Demo.html` in your 
 
 180 deterministic fictional match events; chronological replay; ball-action schematic and possession trails; score, shots, pass accuracy and pressure counts; evidence-linked explanations; fan/coach modes; team filters; English and Spanish local summaries; downloadable recaps and data.
 
-**Local explanations are rule-based, not generative AI.** The Azure provider label appears only after a successful live Azure response. Recaps use English deterministic templates. Spanish local summaries are concise event summaries rather than full translations. No real match footage, video recognition, player tracking, external live feed, autonomous agents or helmet integration is demonstrated.
+**Local explanations are rule-based, not generative AI.** The Azure provider label appears only after a successful live Azure response. Recaps use deterministic English or Spanish templates. Language selection changes narratives and recaps, not the entire interface. No real match footage, video recognition, player tracking, external live feed, autonomous agents or helmet integration is demonstrated.
 
 ## Azure connection, when ready
 
-Copy `.env.example` to `.env`, enter your Azure resource endpoint, API key and compatible chat model deployment name, then restart. The local server loads this file. Never commit keys. For Sites, configure the same variables through server-side environment settings.
+Copy `.env.example` to `.env`, enter your Azure resource endpoint, API key and compatible chat model deployment name, then restart. The local server loads this file. Never commit keys. For Azure App Service, configure the same variables in server-side Environment variables and apply the changes.
 
 The adapter uses Microsoft's documented `/openai/v1/chat/completions` API:
 https://learn.microsoft.com/en-us/azure/foundry/openai/latest
@@ -49,7 +49,7 @@ All teams, names and events are fictional and original. Seed 26 generates 180 ev
 
 ## Status
 
-Built October 4, 2026. The local app is connected to a live Azure model and live inference was verified on October 12, 2026. Browser verification remains pending because no browser backend was available. GitHub publication, registration, demo-video recording/upload and competition submission remain outstanding. The owner-private preview alone does not give judges access. No official affiliations or hardware certifications are claimed.
+Built October 4, 2026. The canonical source is in `competition-app/` in the public repository, deployed through GitHub Actions to [the public Azure app](https://provision-mberry-demo-h4b4bjh7fpapcgfp.westus3-01.azurewebsites.net/). Live Azure inference was verified during deployment. Registration, public demo video and competition submission remain owner actions. Fresh visual/mobile verification remains pending because no connected browser was available.
 
 Official rules: https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md
 
@@ -71,6 +71,6 @@ AI requests are explicit: page load, replay, filters and event selection use loc
 
 Successful interpretations are cached in server memory (up to 100 responses); identical requests do not make another provider call. Restarting clears the response cache but preserves usage counts. One Azure request runs at a time. Each request allows at most 1,024 completion tokens, uses low reasoning effort for GPT-5 deployments, and has a 60-second timeout. Browser cancellation does not guarantee Azure cancellation. Basic narrative/evidence validation now applies to both cloud and local AI; it is not full factual verification.
 
-These are request controls, not a guaranteed dollar ceiling. They do not include playground requests, other apps, previously incurred costs, taxes, or other subscription resources. Actual Azure billing and resource-group budget alerts still require verification in Azure Cost Management. Hosted deployments must supply a durable `PROVISION_RESERVE_AI` guard; absent that guard, cloud requests fail closed to local explanations. `/api/usage` is provided by the local server only.
+These are request controls, not a guaranteed dollar ceiling. They do not include playground requests, other apps, previously incurred costs, taxes, or other subscription resources. Actual Azure billing and resource-group budget alerts still require verification in Azure Cost Management. Hosted deployments must supply a durable `PROVISION_RESERVE_AI` guard; absent that guard, cloud requests fail closed to local explanations. `/api/usage` is provided by the Node server locally and on Azure. Azure defaults to 20 daily attempts and persists the ledger under `/home/provision/`; local defaults to 10. Both default to 100 monthly attempts.
 
 Verification: after the usage update, live inference passed basic evidence checks and a repeated request used the cache without increasing the persistent counter; automated tests cover quota persistence, concurrency, cache reuse and rejected evidence. Browser visual QA is pending because no browser connection is available in this session.

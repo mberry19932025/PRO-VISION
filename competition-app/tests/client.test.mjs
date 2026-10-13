@@ -8,10 +8,10 @@ const pageIds=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
 const source=await readFile(new URL('../src/client.js',import.meta.url),'utf8');
 function harness(fetch,extras={}){
  const elements=new Map();
- function element(){return {click(){this.clicked=true;},textContent:'',value:'',disabled:false,attrs:{},listeners:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},replaceChildren(...children){this.children=children;},append(...items){this.children=[...(this.children||[]),...items];},addEventListener(k,f){this.listeners[k]=f;},querySelector(){return this.button||(this.button=element());}};}
+ function element(){return {click(){this.clicked=true;},remove(){this.removed=true;},textContent:'',value:'',disabled:false,attrs:{},listeners:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},replaceChildren(...children){this.children=children;},append(...items){this.children=[...(this.children||[]),...items];},addEventListener(k,f){this.listeners[k]=f;},querySelector(){return this.button||(this.button=element());}};}
  const get=id=>{assert.ok(pageIds.has(id),'Missing page control: '+id);if(!elements.has(id))elements.set(id,element());return elements.get(id);};
  get('language').value='en';get('favorite').value='all';get('filter').value='all';
- const context=vm.createContext({...core,document:{getElementById:get,createElement:tag=>tag==='canvas'&&extras.testCanvas?extras.testCanvas:element(),createElementNS:element,querySelectorAll:()=>[]},location:{protocol:'http:'},fetch,AbortController,URL,Blob,setTimeout,clearInterval,setInterval,...extras});
+ const context=vm.createContext({...core,document:{body:element(),getElementById:get,createElement:tag=>tag==='canvas'&&extras.testCanvas?extras.testCanvas:element(),createElementNS:element,querySelector:()=>element(),querySelectorAll:()=>[]},location:{protocol:'http:'},fetch,AbortController,URL,Blob,setTimeout,clearInterval,setInterval,...extras});
  vm.runInContext(source,context);
  return {context,get,run:code=>vm.runInContext(code,context)};
 }
@@ -161,4 +161,13 @@ test('app navigation separates match, conversation and memory studio without los
  const h=harness(async()=>({ok:false}));h.get('nav-chat').listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'chat');assert.equal(h.get('match-view').hidden,false);assert.equal(h.get('memory-studio').hidden,true);
  h.get('card-name').value='My card';h.get('card-create').listeners.click();h.get('nav-studio').listeners.click();assert.equal(h.get('memory-studio').hidden,false);assert.equal(h.get('match-view').hidden,true);assert.equal(h.get('nav-studio').attrs['aria-pressed'],'true');
  h.get('card-replay').listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'match');assert.ok(h.run('selectedCard')!==null);h.get('nav-about').listeners.click();assert.equal(h.get('about').hidden,false);
+});
+
+test('offline conversation replaces stale provider and evidence without a cloud request',async()=>{
+ const h=harness(async()=>({ok:false}),{location:{protocol:'file:'}});
+ h.get('provider').textContent='AZURE AI';h.run("activeEvidence=['EV-180']");
+ await h.run('analyze()');
+ assert.match(h.get('provider').textContent,/LOCAL EXPLANATION/);
+ assert.equal(h.run("activeEvidence.includes('EV-180')"),false);
+ assert.match(h.get('notice').textContent,/Standalone demo/);
 });
