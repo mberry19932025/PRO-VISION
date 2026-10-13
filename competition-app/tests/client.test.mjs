@@ -156,3 +156,9 @@ test('show-me-why freezes the explanation and replays only its cited records',()
  h.get('tour-close').listeners.click();assert.equal(h.get('evidence-tour').hidden,true);
 });
 test('changing a moment closes an old evidence tour',()=>{const h=harness(async()=>({ok:false}));h.get('show-why').listeners.click();h.get('next').listeners.click();assert.equal(h.get('evidence-tour').hidden,true);assert.equal(h.run('evidenceTour'),null);});
+
+test('app navigation separates match, conversation and memory studio without losing cards',()=>{
+ const h=harness(async()=>({ok:false}));h.get('nav-chat').listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'chat');assert.equal(h.get('match-view').hidden,false);assert.equal(h.get('memory-studio').hidden,true);
+ h.get('card-name').value='My card';h.get('card-create').listeners.click();h.get('nav-studio').listeners.click();assert.equal(h.get('memory-studio').hidden,false);assert.equal(h.get('match-view').hidden,true);assert.equal(h.get('nav-studio').attrs['aria-pressed'],'true');
+ h.get('card-replay').listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'match');assert.ok(h.run('selectedCard')!==null);h.get('nav-about').listeners.click();assert.equal(h.get('about').hidden,false);
+});
