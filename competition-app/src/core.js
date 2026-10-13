@@ -105,3 +105,17 @@ export function tradingCardSVG(memory,back=false) {
   const content=back?`${text('THE STORY BEHIND THE CARD',44,155,22,'#67d9ff')}${wrap(memory.note||'A moment worth remembering.',35).slice(0,5).map((line,i)=>text(line,44,205+i*30,22)).join('')}${text('RECORDED MATCH FACTS',44,420,18,'#67d9ff')}${wrap(`${memory.player} · ${memory.team}`,36).map((line,i)=>text(line,44,458+i*28,20)).join('')}${text(`${memory.type} · ${memory.outcome}`,44,530,22)}${text(`${memory.eventId} · ${Math.floor(memory.second/60)}:${String(memory.second%60).padStart(2,'0')}`,44,570,20)}${text('Evidence: '+memory.evidence.join(', '),44,620,13)}${text('Your note/media are personal additions.',44,690,16)}${text('They are not evidence of a real match.',44,718,16)}`:`${photo}${text(label,44,645,Math.min(28,Math.floor(840/Math.max(label.length,1))))}${text(memory.player+' · '+memory.type,44,692,22)}${text(memory.eventId+' · '+memory.team,44,734,17,'#67d9ff')}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="840" viewBox="0 0 600 840"><defs><linearGradient id="card-edge" x2="1" y2="1"><stop stop-color="#67d9ff"/><stop offset="1" stop-color="#c997ff"/></linearGradient></defs><rect width="600" height="840" rx="28" fill="#090e16"/><rect x="12" y="12" width="576" height="816" rx="24" fill="#111a26" stroke="url(#card-edge)" stroke-width="3"/><g font-family="Arial,sans-serif">${text('PRO-VISION / MEMORY CARD',44,66,23,'#67d9ff')}${text(back?'PERSONAL STORY / RECORDED EVIDENCE':'MY MATCH. MY MEMORY.',44,108,17)}${content}${text('FICTIONAL MATCH · PERSONAL KEEPSAKE',44,796,15,'#95a3b7')}</g></svg>`;
 }
+
+export const demoFixtures=[
+ {id:'demo-main',league:'Demo Premier',home:'Northbridge FC',away:'Harbour United',status:'Replay available',kickoff:'15:00',summary:'Explore the full fictional match with 180 recorded events, player stats and evidence-linked conversation.',playable:true},
+ {id:'demo-city',league:'Demo Premier',home:'Eastport City',away:'Riverside Athletic',status:'Scheduled',kickoff:'17:30',summary:'Fictional evening fixture. No event replay or player statistics are available for this match.',playable:false},
+ {id:'demo-cup',league:'Demo Cup',home:'Summit Rovers',away:'Westhaven FC',status:'Finished',kickoff:'12:00',score:'2–1',summary:'Fictional final result: Summit Rovers 2–1 Westhaven FC. Summary only; individual events and player stats are unavailable.',playable:false}
+];
+export function fixtureAnswer(question=''){
+ const q=question.toLowerCase();
+ if(!/matches|fixtures|games|kick.?off|when.*play|open.*match|take me.*match|partidos|cuándo.*juega/i.test(q))return null;
+ const teams=demoFixtures.flatMap(f=>[f.home,f.away]);
+ const named=teams.filter(team=>q.includes(team.toLowerCase())||q.includes(team.split(' ')[0].toLowerCase()));
+ const matches=named.length?demoFixtures.filter(f=>named.includes(f.home)||named.includes(f.away)):demoFixtures;
+ return {text:'Demo matchday · fictional fixtures, not today’s real schedule. Times use the demo clock. '+matches.map(f=>`${f.home} vs ${f.away} · ${f.kickoff} · ${f.league} · ${f.status}${f.score?' · '+f.score:''}. ${f.playable?'Open Matchday → Open replay to explore this match.':'Summary only.'}`).join(' '),fixtures:matches};
+}

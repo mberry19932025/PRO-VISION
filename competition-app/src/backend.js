@@ -17,6 +17,7 @@ export default {async fetch(request,env={}) {
     if(!Number.isInteger(index)||index<0||index>=180||!['fan','coach'].includes(mode)||!['en','es'].includes(language)||typeof question!=='string'||question.length>500)return json({error:'Invalid analysis parameters'},400);
     if(!Array.isArray(history)||history.length>4||history.some(m=>!m||!['user','assistant'].includes(m.role)||typeof m.content!=='string'||m.content.length>2000))return json({error:'Invalid conversation history'},400);
     if(!['all',...teams].includes(team)||!['all',...generateMatch().map(e=>e.player)].includes(player))return json({error:'Invalid viewing preferences'},400);
+    const schedule=fixtureAnswer(question);if(schedule)return json({text:schedule.text,provider:'local',evidence:[],notice:'Fictional demo fixtures; no model request.'});
     const viewer={team,player};
     const facts=interpret(generateMatch(),index),fallback=explain(facts,mode,question,language);
     const direct=recordedAnswer(facts,question,language);

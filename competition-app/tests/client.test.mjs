@@ -178,3 +178,15 @@ test('player statistics in chat are free and update with replay time',async()=>{
  h.get('scrub').value='179';h.get('scrub').listeners.input();
  await h.run("analyze('How is Vale doing so far?')");assert.match(h.get('insight').textContent,/through 90:00/);assert.equal(calls,0);
 });
+
+test('fictional matchday filters, summaries, conversation and replay navigation work without model calls',async()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});
+ h.get('nav-matchday').listeners.click();assert.equal(h.get('matchday-view').hidden,false);assert.equal(h.get('match-view').hidden,true);
+ h.get('fixture-today').listeners.click();assert.match(h.get('fixture-answer').textContent,/fictional fixtures/);
+ h.get('fixture-northbridge').listeners.click();assert.match(h.get('fixture-answer').textContent,/Northbridge/);assert.doesNotMatch(h.get('fixture-answer').textContent,/Eastport/);
+ h.get('fixture-league').value='Demo Cup';h.get('fixture-league').listeners.change();assert.equal(h.get('fixture-list').children.length,1);
+ h.get('fixture-list').children[0].children[2].listeners.click();assert.match(h.get('fixture-details').textContent,/2–1/);
+ h.get('fixture-team').value='Northbridge FC';h.get('fixture-team').listeners.change();assert.match(h.get('fixture-list').textContent,/No demo fixtures/);
+ h.get('fixture-league').value='all';h.get('fixture-league').listeners.change();h.get('fixture-list').children[0].children[2].listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'match');assert.equal(h.run('index'),0);
+ await h.run("analyze('Show me today’s matches')");assert.match(h.get('provider').textContent,/DEMO FIXTURES/);assert.equal(h.get('show-why').disabled,true);assert.equal(calls,0);
+});

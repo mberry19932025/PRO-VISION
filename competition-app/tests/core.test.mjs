@@ -122,3 +122,8 @@ test('player summaries use only recorded actions through the replay cursor and a
  const response=await worker.fetch(new Request('https://demo.test/api/analyze',{method:'POST',body:JSON.stringify({index:45,question:'How is Vale doing so far?'})}),{PROVISION_GENERATE:()=>{calls++;throw new Error('Must not run');}});
  const answer=await response.json();assert.equal(calls,0);assert.equal(answer.provider,'local');assert.match(answer.text,/Synthetic match · through 23:00/);assert.match(answer.text,/Vale/);
 });
+
+test('schedule API labels fictional fixtures and never invokes AI',async()=>{
+ let calls=0;const response=await worker.fetch(new Request('https://demo.test/api/analyze',{method:'POST',body:JSON.stringify({question:'When does Northbridge play?'})}),{PROVISION_GENERATE:()=>{calls++;throw new Error('Must not call');}});
+ const answer=await response.json();assert.equal(calls,0);assert.match(answer.text,/fictional fixtures/);assert.match(answer.text,/15:00/);assert.doesNotMatch(answer.text,/Eastport/);assert.deepEqual(answer.evidence,[]);
+});
