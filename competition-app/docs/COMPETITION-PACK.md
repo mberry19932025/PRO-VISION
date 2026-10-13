@@ -1,39 +1,23 @@
 # PRO-VISION AI — Competition Pack
 
-## Problem
+## Project description
 
-The scoreline reports the result; raw event streams do little to explain why a moment matters. Casual fans need accessible context, coaches need evidence, and broadcasters need concise narratives.
+PRO-VISION AI is a conversational football companion that helps fans understand a match and keep the moments that matter. Ask a question, explore a recorded play on the pitch, inspect its evidence, compare players, and turn a favourite moment into a personal trading memory card or a T-shirt design concept.
 
-## Pitch
+The working demo uses 180 original fictional football events, not a live Premier League feed. Fan and coach perspectives, English/Spanish explanations, replay, team/player filters and time-bounded match reports make the same match accessible in different ways.
 
-PRO-VISION AI turns synthetic football events into explainable match intelligence. Fans and coaches explore the same match through different perspectives: an interactive pitch shows the ball action, computed statistics provide context, and explanations expose the underlying event IDs. Team filters and time-bounded recaps make the story personal.
+## Technology and innovation
 
-## Working prototype
+Hosted on Azure App Service, with Microsoft Foundry/Azure OpenAI generating evidence-linked interpretations. The bounded Match Director uses a model-selected function call to choose a recorded moment, the server executes that selection within the replay boundary, and a second model request explains the supplied evidence. It is a single-model tool workflow, not a multi-agent system. Recorded facts and fallback explanations work without model calls.
 
-180 original synthetic events, replay, possession trails, score and passing statistics, tactical rules, fan/coach modes, English/Spanish local summaries, team filtering and downloadable data and recaps.
+The public repository is https://github.com/mberry19932025/PRO-VISION . Canonical source is competition-app/. Live app: https://provision-mberry-demo-h4b4bjh7fpapcgfp.westus3-01.azurewebsites.net/ .
 
-## Architecture
+## Demo and limits
 
-Ingest synthetic events → compute statistics and tactical rules → construct preceding-event evidence → explain → render the moment → personalize by audience and team.
+Start in Chat, ask for recorded player statistics, explore a shot, generate an interpretation, inspect its event citations, then create and download a memory card in Studio. Photo/video media stays in the browser page; download the card to preserve it. The T-shirt and replay tag are concepts, not manufactured products or working physical NFC hardware.
 
-The server-side Azure OpenAI / Microsoft Foundry narrative adapter is implemented and tested with mocked responses. It is not connected to a live Azure resource. GitHub Actions configuration is included; public GitHub publication remains outstanding. Sites hosting is not an Azure-hosting claim.
+AI responses undergo basic evidence and unsupported-claim checks; these do not guarantee every tactical interpretation is correct. No external live sports feed, video recognition, xG, tracking speed or real injury data is connected. Fictional fixtures are clearly labelled.
 
-## Unique advantage
+## Submission still required
 
-Perspective with visible evidence. Viewers inspect the actual action behind an explanation and switch audience modes. Unsupported metrics and player intentions are not substituted with invented values.
-
-## Roadmap
-
-Connect and evaluate Azure-generated narratives; synthetic streaming ingestion; timed broadcast overlay exports; fuller multilingual explanations; Azure deployment with budgets and rate controls. Player-perspective hardware capture remains a separate research direction.
-
-## Honest status
-
-Working now: event generation, replay, calculations, rule-based explanations, audience modes and exports.
-
-Implemented but awaiting live verification: Azure narrative generation.
-
-Not built: video recognition, external live feed, multi-agent orchestration, Azure hosting, physical helmet integration.
-
-## Impact
-
-The prototype aims to make match analysis accessible while keeping evidence available. User comprehension, real model latency and narrative accuracy have not been measured. Add actual Microsoft service/model names to the pitch only after verifying them.
+Owner registration/eligibility, a public video under two minutes, real desktop/phone acceptance checks and confirmation that judges retain free access throughout judging. Shared development quotas are not unlimited judge access. Credits expire November 4, before the judging window ends.

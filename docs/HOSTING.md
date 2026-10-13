@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Hosting plan: GitHub Pages first, custom domain later
 
 The entrant requested GitHub Pages when the app is complete, with a domain purchase later. GitHub Pages and the downloadable prerelease are published for review. No custom domain is configured.

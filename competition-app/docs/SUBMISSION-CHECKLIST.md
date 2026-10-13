@@ -1,23 +1,17 @@
-# Submission readiness
+# Submission readiness — October 13, 2026
 
-Rules reviewed October 4, 2026: https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md
+Official rules: https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md
 
-- [x] New software with original synthetic association-football events.
-- [x] Local ingest → interpret → explain → render → personalize pipeline.
-- [x] Azure adapter implemented; mocked success and fallback verified.
-- [x] Automated checks and build validation pass.
-- [x] Pitch, architecture and video script drafted.
-- [ ] Connect a compatible Azure model; verify a real generated narrative.
-- [ ] Check desktop/mobile layout, replay, questions, filters and downloads in a browser.
-- [ ] Evaluate model outputs and measure latency.
-- [ ] Choose a prize category based on actually demonstrated technology.
-- [ ] Register by October 20, 2026, 12 pm Pacific / 2 pm Chicago.
-- [ ] Confirm eligibility, ownership and participant agreement.
-- [ ] Publish source to a public GitHub repository after checking for secrets.
-- [ ] Record and publicly upload a functioning demo video shorter than two minutes.
-- [ ] Provide judge-accessible demo/test build. Owner-private Sites preview is insufficient for judges.
-- [ ] Maintain free judge access until November 10, 11:59 pm Pacific / November 11, 1:59 am Chicago.
-- [ ] Describe the actual Microsoft and Azure services used.
-- [ ] Submit by October 27, 11:59 pm Pacific / October 28, 1:59 am Chicago.
+- [x] Original synthetic football events and working ingest → interpret → explain → render → personalize pipeline.
+- [x] Public GitHub source and Azure-hosted app.
+- [x] Azure-generated narratives previously verified on the hosted app.
+- [x] Automated regression tests, build and artifact checks.
+- [x] Pitch and architecture describe implemented features and limits.
+- [ ] Owner completes registration by October 20, 2 pm Chicago, and confirms eligibility/ownership/agreement.
+- [ ] Final new Match Director workflow verified on the deployed app.
+- [ ] Real desktop/phone checks of layout, microphone, video frame capture, downloads and navigation.
+- [ ] Public demo video under two minutes on an accepted video host; existing private edit is not a public submission URL.
+- [ ] Confirm free judge access through November 11, 1:59 am Chicago. Credits expire November 4; development quotas can restrict shared AI access.
+- [ ] Select a category based on demonstrated capabilities and complete submission by October 28, 1:59 am Chicago.
 
-The submission/hackathon period starts October 6, 2026, 9 am Pacific / 11 am Chicago. The new-project rule starts with registration on September 29. Recheck official rules before submitting. Do not reuse unverified hardware test/certification claims.
+No registration or submission is claimed complete by these files. Check the official rules and owner account status before submitting. Do not claim a real Premier League data feed, physical NFC/T-shirt production, multi-agent orchestration or full factual verification.

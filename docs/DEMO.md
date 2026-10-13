@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Demo plan — target 1:50
 
 Record the actual local AI app. Do not use the static preview to imply live generation. The final video is not recorded yet.

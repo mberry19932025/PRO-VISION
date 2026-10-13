@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Free local entry path
 
 No paid cloud deployment is needed for this test-build approach. Foundry Local uses the entrant/judge computer. Initial SDK/runtime/model downloads and hardware requirements apply. The rules permit a functioning test build, but installation must be repeatable and software must match the video.

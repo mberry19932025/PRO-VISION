@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import * as core from '../src/core.js';
+import * as sports from '../src/sports.js';
 const html=await readFile(new URL('../src/index.html',import.meta.url),'utf8');
 const pageIds=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
 const source=await readFile(new URL('../src/client.js',import.meta.url),'utf8');
@@ -11,7 +12,7 @@ function harness(fetch,extras={}){
  function element(){return {click(){this.clicked=true;},remove(){this.removed=true;},textContent:'',value:'',disabled:false,attrs:{},listeners:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},replaceChildren(...children){this.children=children;},append(...items){this.children=[...(this.children||[]),...items];},addEventListener(k,f){this.listeners[k]=f;},querySelector(){return this.button||(this.button=element());}};}
  const get=id=>{assert.ok(pageIds.has(id),'Missing page control: '+id);if(!elements.has(id))elements.set(id,element());return elements.get(id);};
  get('language').value='en';get('favorite').value='all';get('filter').value='all';
- const context=vm.createContext({...core,document:{body:element(),getElementById:get,createElement:tag=>tag==='canvas'&&extras.testCanvas?extras.testCanvas:element(),createElementNS:element,querySelector:()=>element(),querySelectorAll:()=>[]},location:{protocol:'http:'},fetch,AbortController,URL,Blob,setTimeout,clearTimeout,clearInterval,setInterval,...extras});
+ const context=vm.createContext({...core,...sports,document:{body:element(),getElementById:get,createElement:tag=>tag==='canvas'&&extras.testCanvas?extras.testCanvas:element(),createElementNS:element,querySelector:()=>element(),querySelectorAll:()=>[]},location:{protocol:'http:'},fetch,AbortController,URL,Blob,setTimeout,clearTimeout,clearInterval,setInterval,...extras});
  vm.runInContext(source,context);
  return {context,get,run:code=>vm.runInContext(code,context)};
 }
@@ -236,4 +237,33 @@ test('follow-up suggestions fill the composer without automatic calls and clear 
  await h.run("analyze('What happened in this moment?')");const buttons=h.get('followup-suggestions').children;assert.equal(buttons.length,2);buttons[0].listeners.click();assert.equal(h.get('question').value,'Explain that more simply.');assert.equal(calls,0);
  h.get('next').listeners.click();assert.equal(h.get('followup-suggestions').children.length,0);
  await h.run("analyze('What is the score?')");h.get('chat-clear').listeners.click();assert.equal(h.get('followup-suggestions').children.length,0);assert.equal(h.get('chat-messages').children.length,0);
+});
+
+test('startup opens the chat composer and match navigation preserves the selected event',async()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});
+ assert.equal(h.run('currentScreen'),'chat');assert.equal(h.get('app-shell').attrs['data-screen'],'chat');assert.equal(h.get('nav-chat').attrs['aria-pressed'],'true');assert.equal(h.get('chat-preferences').open,false);assert.match(h.get('chat-context').textContent,/EV-001/);assert.equal(calls,0);
+ h.get('open-current-match').listeners.click();assert.equal(h.run('currentScreen'),'match');assert.equal(h.run('index'),0);assert.equal(h.get('chat-preferences').open,true);
+ h.get('nav-chat').listeners.click();h.get('chat-start-shot').listeners.click();assert.equal(h.run('events[index].type'),'shot');assert.equal(h.run('currentScreen'),'chat');assert.match(h.get('question').value,/shot/);assert.equal(calls,0);
+ h.get('scrub').value='179';h.get('scrub').listeners.input();h.get('chat-start-shot').listeners.click();assert.equal(h.run('events[index].type'),'shot');
+ await h.run("analyze('What happened in this moment?')");assert.equal(h.get('app-shell').attrs['data-chat-start'],'false');h.get('chat-clear').listeners.click();assert.equal(h.get('app-shell').attrs['data-chat-start'],'true');
+ h.get('brand-home').listeners.click({preventDefault(){}});assert.equal(h.run('currentScreen'),'chat');
+});
+
+test('empty chat submission does not spend AI and report/player workflows remain local',async()=>{
+ const downloads=[];class ExportURL extends URL{static createObjectURL(blob){downloads.push(blob);return 'blob:report';}static revokeObjectURL(){}}
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};},{URL:ExportURL});h.get('question').value='   ';h.get('ask-form').listeners.submit({preventDefault(){}});assert.equal(calls,0);assert.match(h.get('notice').textContent,/Type a question/);
+ h.get('open-report').listeners.click();assert.equal(h.run('currentScreen'),'match');h.get('review-full-match').listeners.click();assert.equal(h.run('index'),179);assert.ok(h.get('report-goals').children.length>0);
+ h.get('compare-first').value='Vale';h.get('compare-second').value='Silva';h.get('compare-players').listeners.click();assert.match(h.get('player-comparison').textContent,/Recorded-action comparison/);
+ h.get('download-report').listeners.click();const report=JSON.parse(await downloads[0].text());assert.equal(report.through,'EV-180');assert.equal(report.synthetic,true);assert.equal(calls,0);
+ h.get('report-goals').children[0].listeners.click();assert.ok(h.run('index')<179);assert.match(h.get('player-comparison').textContent,new RegExp(h.run('events[index].id')));
+});
+test('answer playback is opt-in, matches the last reply and cancels on event navigation',async()=>{
+ const spoken=[];let canceled=0;class Utterance{constructor(text){this.text=text;}}const h=harness(async()=>({ok:false}),{SpeechSynthesisUtterance:Utterance,speechSynthesis:{speak:u=>spoken.push(u),cancel(){canceled++;}}});
+ await h.run("analyze('What is the score?')");assert.equal(spoken.length,0);assert.equal(h.get('read-answer').disabled,false);h.get('read-answer').listeners.click();assert.match(spoken[0].text,/Recorded score/);h.get('next').listeners.click();assert.equal(h.get('read-answer').disabled,true);assert.ok(canceled>0);
+});
+test('director response selects its recorded event, displays honest tool trace and blocks duplicates',async()=>{
+ let calls=0,finish;const h=harness(async(url,options)=>{if(url==='/api/usage')return {ok:false};calls++;assert.equal(url,'/api/director');return new Promise(r=>finish=r);});h.get('review-full-match').listeners.click();
+ const pending=h.run("analyze('Find a key moment so far.',true)");await h.run("analyze('Find a key moment so far.',true)");assert.equal(calls,1);assert.equal(h.get('director').disabled,true);
+ finish({ok:true,json:async()=>({index:9,text:'Recorded shot. This may matter.',provider:'azure',workflow:'tool-using',evidence:['EV-010'],trace:[{step:'find_key_moment'},{step:'inspect_evidence'}]})});await pending;
+ assert.equal(h.run('index'),9);assert.equal(h.get('director-trace').hidden,false);assert.match(h.get('director-trace').textContent,/Azure tool workflow/);assert.equal(h.get('director').disabled,false);
 });

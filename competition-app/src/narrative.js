@@ -11,7 +11,7 @@ export function checkNarrative(raw,facts) {
   const text=result.insight;
   const normalized=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   if((text.match(/EV-\d+/g)||[]).some(id=>!allowed.has(id)))return {ok:false,reason:'The narrative text cited unknown evidence.'};
-  if(/\d/.test(text.replace(/EV-\d+/g,''))||/\bxg\b|expected goals|\bmph\b|km\/h|injur|\bintended\b|\bwanted\b|\bknew\b|\bdeliberately\b|\btrying to\b|\baiming to\b|\bplanning to\b|\bintentando\b|\bpretendía\b|goles esperados|lesion|\bqueria\b|\bquiso\b|\bsabia\b|\bintencionalmente\b|\bdeliberadamente\b/i.test(normalized))return {ok:false,reason:'The narrative introduced unsupported metrics or player intent.'};
+  if(/\d/.test(text.replace(/EV-\d+/g,''))||/\bxg\b|expected goals|off[- ]ball|formation|\bspeed\b|\bvelocity\b|\bmph\b|km\/h|injur|\bintended\b|\bwanted\b|\bknew\b|\bdeliberately\b|\btrying to\b|\baiming to\b|\bplanning to\b|\bintentando\b|\bpretendía\b|goles esperados|lesion|\bqueria\b|\bquiso\b|\bsabia\b|\bintencionalmente\b|\bdeliberadamente\b/i.test(normalized))return {ok:false,reason:'The narrative introduced unsupported metrics or player intent.'};
   if(facts.event.outcome!=='goal'&&/\bscored\b|scoring a goal|goal was scored|\bmarco\b|\banoto\b|\bmetio un gol\b/i.test(normalized))return {ok:false,reason:'The narrative claimed an unrecorded goal.'};
   return {ok:true,insight:text.trim(),evidence:[...new Set(result.evidenceIds)]};
 }

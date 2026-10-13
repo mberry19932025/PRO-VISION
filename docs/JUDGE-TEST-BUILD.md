@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Judge test build — local Microsoft AI
 
 This is an installation route permitted by the rules' test-build option, not a claim that a static preview contains working AI. Current verification is on an 8 GB Apple Silicon Mac. Other hardware/operating systems, a clean judge installation, and organizer acceptance of the selected prize category remain unverified. Do not submit until installation and interaction are reproducible.

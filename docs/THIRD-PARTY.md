@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Third-party components
 
 - `foundry-local-sdk` 2.1.0: Microsoft Foundry Local SDK, MIT package license. Its dependencies and integrity hashes are pinned in package-lock.json. Preserve the package's license when redistributing it.

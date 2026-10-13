@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # PRO-VISION demo narration — rehearse to 1:50
 
 Record working software, not slides alone. This script is a draft for the verified build: if cloud AI is not verified, show the actual local model and name it Foundry Local. Never claim an unperformed result. Narration should finish before 1:50 to leave room for pauses; the public video must stay under two minutes.

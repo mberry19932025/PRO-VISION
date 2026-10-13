@@ -1,5 +1,6 @@
 const azureCache=new Map();
 let azureBusy=false;
+const directorCache=new Map();
 async function readJSON(request) {
   if(Number(request.headers.get('content-length'))>16384)throw new Error('Request too large');
   const text=await request.text();if(text.length>16384)throw new Error('Request too large');return JSON.parse(text);
@@ -7,7 +8,21 @@ async function readJSON(request) {
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 export default {async fetch(request,env={}) {
   const url=new URL(request.url);
+  if(url.pathname==='/api/health'&&!['GET','HEAD'].includes(request.method))return json({error:'Use GET'},405);
   if(url.pathname==='/api/health')return json({ok:true,provider:typeof env.PROVISION_GENERATE==='function'?'foundry-local':env.AZURE_OPENAI_API_KEY&&env.AZURE_OPENAI_ENDPOINT&&env.AZURE_OPENAI_DEPLOYMENT?'azure':'local',dataset:'synthetic',events:180});
+  if(url.pathname==='/api/director'){
+    if(request.method!=='POST')return json({error:'Use POST'},405);
+    if(request.headers.get('origin')&&request.headers.get('origin')!==url.origin)return json({error:'Origin not allowed'},403);
+    let body;try{body=await readJSON(request);}catch{return json({error:'Invalid JSON'},400);}
+    if(!body||typeof body!=='object'||Array.isArray(body))return json({error:'Expected object'},400);
+    const {index=0,mode='fan',language='en',question='',team='all',player='all'}=body;
+    if(!Number.isInteger(index)||index<0||index>=180||!['fan','coach'].includes(mode)||!['en','es'].includes(language)||typeof question!=='string'||question.length>500||!['all',...teams].includes(team)||!['all',...generateMatch().map(e=>e.player)].includes(player))return json({error:'Invalid director parameters'},400);
+    const input={index,mode,language,question,team,player},key=JSON.stringify([env.AZURE_OPENAI_ENDPOINT,env.AZURE_OPENAI_DEPLOYMENT,input]);
+    if(directorCache.has(key))return json({...directorCache.get(key),cached:true,notice:'Saved Match Director result. No new model request.'});
+    if(azureBusy)return json({index,text:explain(interpret(generateMatch(),index),mode,'',language),provider:'local',evidence:interpret(generateMatch(),index).evidence,workflow:'rule-based',trace:[],notice:'An AI request is already running. Try again shortly.'});
+    azureBusy=true;
+    try{const result=await runMatchDirector(input,env);if(result.provider==='azure'){if(directorCache.size>=50)directorCache.delete(directorCache.keys().next().value);directorCache.set(key,result);}return json(result);}finally{azureBusy=false;}
+  }
   if(url.pathname==='/api/analyze') {
     if(request.method!=='POST')return json({error:'Use POST'},405);
     if(request.headers.get('origin')&&request.headers.get('origin')!==url.origin)return json({error:'Origin not allowed'},403);
@@ -20,7 +35,7 @@ export default {async fetch(request,env={}) {
     const schedule=fixtureAnswer(question);if(schedule)return json({text:schedule.text,provider:'local',evidence:[],notice:'Fictional demo fixtures; no model request.'});
     const viewer={team,player};
     const facts=interpret(generateMatch(),index),fallback=explain(facts,mode,question,language);
-    const direct=recordedAnswer(facts,question,language);
+    const direct=footballAnswer(facts,question,mode,viewer,language)||recordedAnswer(facts,question,language);
     if(direct)return json({...direct,provider:'local',notice:language==='es'?'Respuesta de los datos registrados; sin solicitud al modelo.':'Answered from recorded data; no model request.'});
     if(typeof env.PROVISION_GENERATE==='function') {
       const started=performance.now();
@@ -57,11 +72,12 @@ export default {async fetch(request,env={}) {
     }catch(error){const notice=error.providerStatus===429?'Azure rate limit reached. Wait briefly before trying again.':error.providerStatus===401||error.providerStatus===403?'Azure authentication failed. Check the server configuration.':error.name==='TimeoutError'?'Azure took too long to respond.': 'Azure analysis unavailable.';return json({text:fallback,provider:'local',notice:notice+' Showing the local evidence-based explanation.',evidence:facts.evidence});}
     finally{azureBusy=false;}
   }
-  if(url.pathname==='/bootstrap.js')return new Response(BOOTSTRAP,{headers:{'content-type':'text/javascript'}});
+  if(!['GET','HEAD'].includes(request.method))return json({error:'Use GET'},405);
+  if(url.pathname==='/bootstrap.js')return new Response(BOOTSTRAP,{headers:{'content-type':'text/javascript','cache-control':'no-cache'}});
   if(url.pathname==='/brand.svg')return new Response(BRAND,{headers:{'content-type':'image/svg+xml'}});
-  if(url.pathname==='/app.js')return new Response(CLIENT,{headers:{'content-type':'text/javascript'}});
-  if(url.pathname==='/styles.css')return new Response(CSS,{headers:{'content-type':'text/css'}});
+  if(url.pathname==='/app.js')return new Response(CLIENT,{headers:{'content-type':'text/javascript','cache-control':'no-cache'}});
+  if(url.pathname==='/styles.css')return new Response(CSS,{headers:{'content-type':'text/css','cache-control':'no-cache'}});
   if(url.pathname==='/dataset.json')return json({provenance:'Original fictional football events generated by PRO-VISION AI. Seed 26. Not real match data.',pitch:{length:105,width:68},events:generateMatch()});
   if(url.pathname!=='/')return new Response('Not found',{status:404});
-  return new Response(HTML,{headers:{'content-type':'text/html; charset=utf-8','x-content-type-options':'nosniff','referrer-policy':'same-origin','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'"}});
+  return new Response(HTML,{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-cache','x-content-type-options':'nosniff','referrer-policy':'same-origin','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'"}});
 }};

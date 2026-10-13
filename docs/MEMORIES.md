@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # My match. My memory.
 
 Implemented: capture the selected synthetic match event, its computed observation, viewing preferences and bounded evidence. Add a nickname, personal note and optional PNG/JPEG/WebP photo (up to 1 MB). Keep up to six memories in this browser, download an SVG memory card, or download an offline HTML keepsake with fan/analyst lenses and expandable evidence. Saved AI interpretations retain their provider label and are not independently verified. Export lenses use computed templates.

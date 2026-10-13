@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Clean archive installation check
 
 Checked October 8, 2026, on the same 8 GB Apple Silicon Mac used for development. This is a fresh dependency installation, not an independent hardware or operating-system test.

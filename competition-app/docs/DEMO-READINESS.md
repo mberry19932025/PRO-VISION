@@ -5,9 +5,9 @@ https://provision-mberry-demo-h4b4bjh7fpapcgfp.westus3-01.azurewebsites.net/
 
 ## Verified
 
-70 automated tests pass. Checks cover replay, filters, conversation history, stale responses, fan/coach lenses, English/Spanish narratives and recaps, microphone fallbacks, memory media, card exports, evidence tours, app navigation, startup recovery, validation and persistent quotas. Build and artifact validation pass. Browser API tests use substitutes; they do not establish real phone microphone or video compatibility.
+83 automated tests pass. Checks cover replay, filters, conversation history, stale responses, fan/coach lenses, English/Spanish narratives and recaps, microphone fallbacks, memory media, card exports, evidence tours, app navigation, startup recovery, validation and persistent quotas. Build and artifact validation pass. Browser API tests use substitutes; they do not establish real phone microphone or video compatibility.
 
-The hosted usage endpoint responds. This review made no paid model requests. Its observed allowance was 20 attempts per UTC day and 100 per UTC month, with 6 monthly attempts consumed. Counts can change after this check. Hosting is the configured Free F1 plan; AI inference has separate usage costs. Request limits are not a dollar spending ceiling.
+The hosted usage endpoint responds. This review made no paid model requests. Its observed allowance was 20 attempts per UTC day and 100 per UTC month, with usage counts available from /api/usage. Counts can change after this check. Hosting is the configured Free F1 plan; AI inference has separate usage costs. Request limits are not a dollar spending ceiling.
 
 ## Demo sequence
 
@@ -32,3 +32,7 @@ Creation brings the preview into view and focuses it. Media loading has a timeou
 ## First-time conversation flow
 
 Three entry points explain the journey: explore a moment, ask about a play, or make a memory card. Chat retains the pitch as context and offers explicit follow-up prompts after replies. Evidence and Keep this moment actions link the conversation to records and Studio. Prompts fill the composer and require Send; they do not create automatic Azure requests. On a selected shot, entering the conversation retains that event. The existing demo video is genuine footage recorded before these interface refinements.
+
+## Chat-first opening
+
+The default and brand-home destination is Chat. A large composer and suggested prompts lead the page; personalization is in an expandable section. The play preview is compact and the full Match room is available through navigation or View selected play. Choosing a shot preserves a selected shot or finds a matching one, including from the end of the replay. Startup, suggestions and navigation make no automatic model requests. The existing video predates this layout change; no new UI recording is fabricated.

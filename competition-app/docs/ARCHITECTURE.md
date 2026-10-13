@@ -1,26 +1,17 @@
 # Architecture
 
-```mermaid
-flowchart LR
- A[Original synthetic events] --> B[Replay cursor]
- B --> C[Statistics and tactical rules]
- C --> D[Preceding-event evidence]
- D --> E[Local explanation]
- D --> F[Azure AI adapter]
- F --> G[Generated narrative or labeled fallback]
- E --> H[Pitch and intelligence panel]
- G --> H
- B --> I[Personalized recap]
-```
+The canonical source is src/, compiled into worker/index.js with embedded HTML, CSS and client assets. scripts/dev.mjs adapts the module to Node HTTP for local development and Azure App Service. GitHub Actions builds and deploys the repository; the root start script delegates to competition-app.
 
-The client sends an index, not arbitrary facts. The server regenerates the match and uses only context at or before that index. Replay cancels stale requests and ignores late results.
+Original synthetic events → replay cursor → recorded statistics and tactical rules → preceding-event evidence → local or Azure explanation → pitch/conversation → personalized memory card.
 
-Routes: `GET /`, `/app.js`, `/styles.css`, `/dataset.json`, `/api/health`; `POST /api/analyze` with index, mode, language and question. Health indicates configuration, not proven provider connectivity.
+The client submits a replay index and viewing preferences, not arbitrary match facts. The server regenerates the deterministic match and bounds all evidence to that cursor. Navigation cancels stale responses. APIs validate parameters and reject cross-origin requests.
 
-Progressive pass means a completed pass advancing at least 15 coordinate percentage points. A pressure cluster means at least two pressure events among the latest six actions. Shots do not produce invented xG. Coordinates are normalized toward the attacking goal; distance assumes a 105 × 68 m pitch.
+POST /api/analyze answers supported recorded questions locally or requests an Azure interpretation. POST /api/director permits one allowlisted find_key_moment function call, executes it against recorded events, then requests an evidence-linked explanation. Each attempted provider request reserves quota separately. The Director may consume two attempts. Foundry Local mode keeps the Director rule-based.
 
-Evidence chips list records supplied to the narrative service, not independent validation of every generated claim. Azure responses remain model interpretations. Review outputs and measure latency before recording the competition demo.
+GET /api/health reports configuration, not proven model connectivity. GET /api/usage reports persistent attempt quotas. Static assets revalidate to reduce stale deployment state. Startup ledger corruption disables cloud requests while preserving recorded features; it never resets usage silently.
 
-Deployable artifact: one Worker ES module with embedded assets. Local execution uses the Node HTTP adapter. Azure hosting is a future deployment step, not implemented here.
+Successful Azure results are cached in process. One process shares a busy guard and a persistent usage ledger. This is a single-instance demo, not a distributed quota system. Daily/monthly attempt limits do not enforce a dollar spending ceiling.
 
-Automated checks cover deterministic/bounded events, temporal grounding, known statistics, audience differences, unsupported local questions, request validation, origins, local mode, mocked Azure success/outage and routes. Browser layout and click verification is pending because no browser backend was available.
+Progressive passing uses completed forward movement of at least 15 coordinate points. Distances assume a 105 × 68 m pitch. No xG, speed, off-ball tracking or player intentions are inferred as facts. Evidence checks are basic, not comprehensive factual validation.
+
+Memory-card media is processed locally, never uploaded by this app. Downloads preserve the selected card. Speech input/readout uses supported browser APIs and is optional. Automated DOM substitutes do not establish real browser or phone compatibility.

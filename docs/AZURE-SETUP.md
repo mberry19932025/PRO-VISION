@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # Azure credit setup — PRO-VISION
 
 Use GitHub for source and Azure for the model and hosted backend. No model key belongs in GitHub or chat.

@@ -17,9 +17,10 @@ export function generateMatch(seed=26) {
   });
 }
 export function statistics(events) {
-  return teams.map(team=>{const own=events.filter(e=>e.team===team),passes=own.filter(e=>e.type==='pass');return {team,goals:own.filter(e=>e.outcome==='goal').length,shots:own.filter(e=>e.type==='shot').length,passes:passes.length,accuracy:passes.length?Math.round(passes.filter(e=>e.outcome==='complete').length/passes.length*100):0,pressure:own.filter(e=>e.type==='pressure').length};});
+  return teams.map(team=>{const own=events.filter(e=>e.team===team),passes=own.filter(e=>e.type==='pass');return {team,goals:own.filter(e=>e.outcome==='goal').length,shots:own.filter(e=>e.type==='shot').length,passes:passes.length,completed:passes.filter(e=>e.outcome==='complete').length,shotsOnTarget:own.filter(e=>e.type==='shot'&&['saved','goal'].includes(e.outcome)).length,tackles:own.filter(e=>e.type==='tackle').length,accuracy:passes.length?Math.round(passes.filter(e=>e.outcome==='complete').length/passes.length*100):0,pressure:own.filter(e=>e.type==='pressure').length};});
 }
 export function interpret(events,index) {
+  if(!Number.isInteger(index)||index<0||index>=events.length)throw new Error('Invalid replay cursor');
   const event=events[index];if(!event)throw new Error('Unknown event');
   const context=events.slice(0,index+1).filter(e=>e.sequence===event.sequence).slice(-6);
   const passDistance=event.type==='pass'?Math.hypot((event.end.x-event.start.x)*1.05,(event.end.y-event.start.y)*.68):null;
@@ -34,8 +35,10 @@ export function recordedAnswer(facts,question='',language='en') {
   if(/what happened|what occurred|qué ocurrió|que ocurrio|qu[eé] pas[oó]/i.test(q))return {text:observedLead(facts.event,language).replace(/Interpretation: $|Interpretación: $/,'').trim(),evidence:[facts.event.id]};
   if(/\bxg\b|expected goals|goals? probability|speed|injur|weather|off.ball|formation|intention|velocidad|lesi[oó]n|clima|sin bal[oó]n|formaci[oó]n|intenci[oó]n/i.test(q))return {text:es?'Estos datos no registran xG, velocidad, lesiones, clima, movimientos sin balón, formaciones ni intenciones. No se puede deducir esa información.':'These records do not include xG, speed, injuries, weather, off-ball movement, formations or intentions. That information cannot be inferred.',evidence:[facts.event.id]};
   if(/\bscore\b|marcador|resultado del partido/i.test(q))return {text:es?`Marcador registrado: ${facts.stats[0].team} ${facts.stats[0].goals}–${facts.stats[1].goals} ${facts.stats[1].team}, hasta ${facts.event.id}.`:`Recorded score: ${facts.stats[0].team} ${facts.stats[0].goals}–${facts.stats[1].goals} ${facts.stats[1].team}, through ${facts.event.id}.`,evidence:[facts.event.id]};
-  if(/distance|how far|distancia|cu[aá]nto.*pase/i.test(q))return {text:facts.passDistance===null?(es?'El evento seleccionado no es un pase; no tiene una distancia de pase registrada.':'The selected event is not a pass; it has no recorded pass distance.'):(es?`Distancia estimada del pase: ${facts.passDistance} m, calculada a partir de las coordenadas sobre un campo supuesto de 105 × 68 m.`:`Estimated pass distance: ${facts.passDistance} m, calculated from coordinates on an assumed 105 × 68 m pitch.`),evidence:[facts.event.id]};
-  if(/stats?|statistics|how is .+ doing|how many .*(passes|shots|goals)|estadísticas|estadisticas|cómo va|como va|cuántos|cuantos/i.test(q)){
+  if(/distance|how far|distancia|cu[aá]nto.*mide.*pase/i.test(q))return {text:facts.passDistance===null?(es?'El evento seleccionado no es un pase; no tiene una distancia de pase registrada.':'The selected event is not a pass; it has no recorded pass distance.'):(es?`Distancia estimada del pase: ${facts.passDistance} m, calculada a partir de las coordenadas sobre un campo supuesto de 105 × 68 m.`:`Estimated pass distance: ${facts.passDistance} m, calculated from coordinates on an assumed 105 × 68 m pitch.`),evidence:[facts.event.id]};
+  if(/\bstats?\b|\bstatistics\b|how is .+ doing|how many .*(passes|shots|goals)|pass accuracy|shots on target|completed passes|estadísticas|estadisticas|cómo va|como va|cuántos|cuantos/i.test(q)){
+    const namedTeam=facts.stats.find(s=>q.toLowerCase().includes(s.team.toLowerCase())||q.toLowerCase().includes(s.team.split(' ')[0].toLowerCase()));
+    if(namedTeam)return {text:(es?'Acciones registradas · hasta ':'Recorded actions · through ')+facts.event.id+`. ${namedTeam.team}: ${namedTeam.completed}/${namedTeam.passes} `+(es?'pases completados':'passes completed')+`, ${namedTeam.shots} `+(es?'tiros':'shots')+`, ${namedTeam.goals} `+(es?'goles':'goals')+`. `+(es?'Precisión de pases: ':'Pass accuracy: ')+(namedTeam.passes?`${namedTeam.accuracy}%.`:(es?'sin pases registrados.':'no recorded passes.')),evidence:[facts.event.id]};
     const named=(facts.playerStats||[]).filter(s=>q.toLowerCase().split(/[^a-z]+/).includes(s.player.toLowerCase()));
     const selected=named.length===1?named[0]:/this player|selected player|este jugador/i.test(q)?facts.playerStats?.find(s=>s.player===facts.event.player):null;
     if(!selected)return {text:es?'Indica el nombre de un jugador: '+(facts.playerStats||[]).map(s=>s.player).join(', ')+'.':'Please name one player: '+(facts.playerStats||[]).map(s=>s.player).join(', ')+'.',evidence:[facts.event.id]};
@@ -91,18 +94,19 @@ export function commentaryLine(event,language='en') {
   return lines[event.type]||'';
 }
 
+function cleanMemoryText(value){return Array.from(String(value)).map(char=>char.length===1&&/[\uD800-\uDFFF]/.test(char)?'�':char).join('').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g,'');}
 export function createTradingMemory(eventIndex,{name='',note='',photo='',mediaKind='none'}={}) {
   const facts=interpret(generateMatch(),eventIndex);
   if(photo&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(photo)||photo.length>3000000))throw new Error('Use a local image under the card size limit.');
-  return {version:1,index:eventIndex,eventId:facts.event.id,player:facts.event.player,team:facts.event.team,second:facts.event.second,type:facts.event.type,outcome:facts.event.outcome,name:Array.from(String(name).trim()).slice(0,32).join(''),note:Array.from(String(note).trim()).slice(0,160).join(''),photo,mediaKind:photo?(mediaKind==='video-frame'?'video-frame':'photo'):'none',evidence:facts.evidence,synthetic:true};
+  return {version:1,index:eventIndex,eventId:facts.event.id,player:facts.event.player,team:facts.event.team,second:facts.event.second,type:facts.event.type,outcome:facts.event.outcome,name:Array.from(cleanMemoryText(name).trim()).slice(0,32).join(''),note:Array.from(cleanMemoryText(note).trim()).slice(0,160).join(''),photo,mediaKind:photo?(mediaKind==='video-frame'?'video-frame':'photo'):'none',evidence:facts.evidence,synthetic:true};
 }
 export function tradingCardSVG(memory,back=false) {
   const xml=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const wrap=(text,width)=>{const chunks=String(text).match(new RegExp('.{1,'+width+'}','gu'))||[];return chunks;};
+  const wrap=(text,width)=>String(text).split(/\r?\n/).flatMap(line=>{const chars=Array.from(line),rows=[];for(let i=0;i<chars.length;i+=width)rows.push(chars.slice(i,i+width).join(''));return rows.length?rows:[''];});
   const text=(value,x,y,size=22,color='#f2f6fc')=>`<text x="${x}" y="${y}" font-size="${size}" fill="${color}">${xml(value)}</text>`;
   const label=memory.name||memory.player;
   const photo=memory.photo?`<image href="${xml(memory.photo)}" x="44" y="180" width="512" height="410" preserveAspectRatio="xMidYMid slice"/>`:`<rect x="44" y="180" width="512" height="410" rx="16" fill="#123b34"/><circle cx="300" cy="385" r="100" fill="none" stroke="#67d9ff" stroke-width="3"/>${text(memory.type.toUpperCase(),90,380,44)}${text(memory.outcome.toUpperCase(),90,440,26,'#67d9ff')}`;
-  const content=back?`${text('THE STORY BEHIND THE CARD',44,155,22,'#67d9ff')}${wrap(memory.note||'A moment worth remembering.',35).slice(0,5).map((line,i)=>text(line,44,205+i*30,22)).join('')}${text('RECORDED MATCH FACTS',44,420,18,'#67d9ff')}${wrap(`${memory.player} · ${memory.team}`,36).map((line,i)=>text(line,44,458+i*28,20)).join('')}${text(`${memory.type} · ${memory.outcome}`,44,530,22)}${text(`${memory.eventId} · ${Math.floor(memory.second/60)}:${String(memory.second%60).padStart(2,'0')}`,44,570,20)}${text('Evidence: '+memory.evidence.join(', '),44,620,13)}${text('Your note/media are personal additions.',44,690,16)}${text('They are not evidence of a real match.',44,718,16)}`:`${photo}${text(label,44,645,Math.min(28,Math.floor(840/Math.max(label.length,1))))}${text(memory.player+' · '+memory.type,44,692,22)}${text(memory.eventId+' · '+memory.team,44,734,17,'#67d9ff')}`;
+  const content=back?`${text('THE STORY BEHIND THE CARD',44,155,22,'#67d9ff')}${wrap((memory.note||'A moment worth remembering.').replace(/\s+/g,' '),35).map((line,i)=>text(line,44,205+i*30,22)).join('')}${text('RECORDED MATCH FACTS',44,420,18,'#67d9ff')}${wrap(`${memory.player} · ${memory.team}`,36).map((line,i)=>text(line,44,458+i*28,20)).join('')}${text(`${memory.type} · ${memory.outcome}`,44,530,22)}${text(`${memory.eventId} · ${Math.floor(memory.second/60)}:${String(memory.second%60).padStart(2,'0')}`,44,570,20)}${text('Evidence: '+memory.evidence.join(', '),44,620,13)}${text('Your note/media are personal additions.',44,690,16)}${text('They are not evidence of a real match.',44,718,16)}`:`${photo}${text(label,44,645,Math.min(28,Math.floor(840/Math.max(label.length,1))))}${text(memory.player+' · '+memory.type,44,692,22)}${text(memory.eventId+' · '+memory.team,44,734,17,'#67d9ff')}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="840" viewBox="0 0 600 840"><defs><linearGradient id="card-edge" x2="1" y2="1"><stop stop-color="#67d9ff"/><stop offset="1" stop-color="#c997ff"/></linearGradient></defs><rect width="600" height="840" rx="28" fill="#090e16"/><rect x="12" y="12" width="576" height="816" rx="24" fill="#111a26" stroke="url(#card-edge)" stroke-width="3"/><g font-family="Arial,sans-serif">${text('PRO-VISION / MEMORY CARD',44,66,23,'#67d9ff')}${text(back?'PERSONAL STORY / RECORDED EVIDENCE':'MY MATCH. MY MEMORY.',44,108,17)}${content}${text('FICTIONAL MATCH · PERSONAL KEEPSAKE',44,796,15,'#95a3b7')}</g></svg>`;
 }
 
@@ -113,6 +117,7 @@ export const demoFixtures=[
 ];
 export function fixtureAnswer(question=''){
  const q=question.toLowerCase();
+ if(/\b(nfl|nba|basketball|cricket|american football)\b/.test(q))return {text:'PRO-VISION covers association football using labeled fictional demo fixtures. Other sports and real live schedules are not connected.',fixtures:[]};
  if(!/matches|fixtures|games|kick.?off|when.*play|open.*match|take me.*match|partidos|cuándo.*juega/i.test(q))return null;
  const teams=demoFixtures.flatMap(f=>[f.home,f.away]);
  const named=teams.filter(team=>q.includes(team.toLowerCase())||q.includes(team.split(' ')[0].toLowerCase()));

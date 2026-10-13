@@ -19,11 +19,11 @@ For an immediate offline preview, open `output/PRO-VISION-AI-Demo.html` in your 
 
 ## Working features
 
-180 deterministic fictional match events; chronological replay; ball-action schematic and possession trails; score, shots, pass accuracy and pressure counts; evidence-linked explanations; fan/coach modes; team filters; English and Spanish local summaries; downloadable recaps and data.
+180 deterministic fictional match events; chronological replay; ball-action schematic and possession trails; score, shots, pass accuracy and pressure counts; evidence-linked explanations; fan/coach modes; team/player filters; English and Spanish local summaries; downloadable recaps and data; chat-first conversation; recorded player comparisons and match reports; bounded Match Director function calling; personal photo/video memory cards; T-shirt design concepts; optional browser speech input and readout.
 
-**Local explanations are rule-based, not generative AI.** The Azure provider label appears only after a successful live Azure response. Recaps use deterministic English or Spanish templates. Language selection changes narratives and recaps, not the entire interface. No real match footage, video recognition, player tracking, external live feed, autonomous agents or helmet integration is demonstrated.
+**Local explanations are rule-based, not generative AI.** The Azure provider label appears only after a successful live Azure response. Recaps use deterministic English or Spanish templates. Language selection changes narratives and recaps, not the entire interface. No real match footage, video recognition, player tracking, external live feed, multi-agent orchestration or helmet integration is demonstrated.
 
-## Azure connection, when ready
+## Azure configuration
 
 Copy `.env.example` to `.env`, enter your Azure resource endpoint, API key and compatible chat model deployment name, then restart. The local server loads this file. Never commit keys. For Azure App Service, configure the same variables in server-side Environment variables and apply the changes.
 
@@ -74,3 +74,5 @@ Successful interpretations are cached in server memory (up to 100 responses); id
 These are request controls, not a guaranteed dollar ceiling. They do not include playground requests, other apps, previously incurred costs, taxes, or other subscription resources. Actual Azure billing and resource-group budget alerts still require verification in Azure Cost Management. Hosted deployments must supply a durable `PROVISION_RESERVE_AI` guard; absent that guard, cloud requests fail closed to local explanations. `/api/usage` is provided by the Node server locally and on Azure. Azure defaults to 20 daily attempts and persists the ledger under `/home/provision/`; local defaults to 10. Both default to 100 monthly attempts.
 
 Verification: after the usage update, live inference passed basic evidence checks and a repeated request used the cache without increasing the persistent counter; automated tests cover quota persistence, concurrency, cache reuse and rejected evidence. Browser visual QA is pending because no browser connection is available in this session.
+
+Match Director may consume two cloud attempts: one validated tool selection and one evidence-linked explanation. It shares the existing quotas and falls back to recorded rules. No cloud calls occur on startup or navigation.

@@ -1,3 +1,5 @@
+> Historical prototype notes. For the current deployed app, use [the canonical application](../competition-app/README.md) and [current submission checklist](../competition-app/docs/SUBMISSION-CHECKLIST.md).
+
 # PRO-VISION — draft entry pitch
 
 PRO-VISION helps viewers understand a football moment and keep their own story of it. An original synthetic event stream powers replay, measured statistics, transparent pattern rules and personalized explanations for fans, analysts and broadcasters. Microsoft Phi-3.5-mini runs locally through Foundry Local, with bounded evidence, output checks and visibly computed fallback when generation fails.
