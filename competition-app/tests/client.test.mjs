@@ -171,3 +171,10 @@ test('offline conversation replaces stale provider and evidence without a cloud 
  assert.equal(h.run("activeEvidence.includes('EV-180')"),false);
  assert.match(h.get('notice').textContent,/Standalone demo/);
 });
+
+test('player statistics in chat are free and update with replay time',async()=>{
+ let calls=0;const h=harness(async url=>{if(url!=='/api/usage')calls++;return {ok:false};});
+ await h.run("analyze('How is Vale doing so far?')");assert.match(h.get('insight').textContent,/1 of 1 passes/);
+ h.get('scrub').value='179';h.get('scrub').listeners.input();
+ await h.run("analyze('How is Vale doing so far?')");assert.match(h.get('insight').textContent,/through 90:00/);assert.equal(calls,0);
+});

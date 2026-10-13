@@ -105,3 +105,20 @@ test('hosted media policy allows local video previews without external media hos
 test('brand and loading module routes are served for hosted startup',async()=>{
  const brand=await worker.fetch(new Request('https://provision.test/brand.svg'));assert.equal(brand.status,200);assert.match(brand.headers.get('content-type'),/image\/svg/);const boot=await worker.fetch(new Request('https://provision.test/bootstrap.js'));assert.equal(boot.status,200);assert.match(await boot.text(),/loading-screen/);
 });
+
+test('player summaries use only recorded actions through the replay cursor and avoid inference',async()=>{
+ const events=generateMatch();
+ for(const index of [0,45,179]){
+  const facts=interpret(events,index);
+  for(const summary of facts.playerStats){
+   const own=events.slice(0,index+1).filter(e=>e.player===summary.player);
+   assert.equal(summary.shots,own.filter(e=>e.type==='shot').length);
+   assert.equal(summary.completed,own.filter(e=>e.type==='pass'&&e.outcome==='complete').length);
+   assert.equal(summary.goals,own.filter(e=>e.outcome==='goal').length);
+   assert.ok(summary.evidence.every(id=>events.find(e=>e.id===id).second<=facts.event.second));
+  }
+ }
+ let calls=0;
+ const response=await worker.fetch(new Request('https://demo.test/api/analyze',{method:'POST',body:JSON.stringify({index:45,question:'How is Vale doing so far?'})}),{PROVISION_GENERATE:()=>{calls++;throw new Error('Must not run');}});
+ const answer=await response.json();assert.equal(calls,0);assert.equal(answer.provider,'local');assert.match(answer.text,/Synthetic match · through 23:00/);assert.match(answer.text,/Vale/);
+});

@@ -26,7 +26,8 @@ export function interpret(events,index) {
   const progressive=event.type==='pass'&&event.outcome==='complete'&&event.end.x-event.start.x>=15;
   const pressures=context.filter(e=>e.type==='pressure').length;
   const pattern=event.type==='shot'?'Chance created':event.type==='tackle'?'Possession turnover':progressive?'Progressive pass':pressures>=2?'Pressure cluster':'Build-up play';
-  return {event,context,pattern,passDistance:passDistance===null?null:+passDistance.toFixed(1),pressures,stats:statistics(events.slice(0,index+1)),evidence:context.map(e=>e.id)};
+  const playerStats=[...new Set(events.map(e=>e.player))].map(player=>{const own=events.slice(0,index+1).filter(e=>e.player===player),passes=own.filter(e=>e.type==='pass');return {player,team:events.find(e=>e.player===player).team,passes:passes.length,completed:passes.filter(e=>e.outcome==='complete').length,shots:own.filter(e=>e.type==='shot').length,goals:own.filter(e=>e.outcome==='goal').length,evidence:own.map(e=>e.id)};});
+  return {event,context,pattern,playerStats,passDistance:passDistance===null?null:+passDistance.toFixed(1),pressures,stats:statistics(events.slice(0,index+1)),evidence:context.map(e=>e.id)};
 }
 export function recordedAnswer(facts,question='',language='en') {
   const q=question.trim(),es=language==='es';if(!q)return null;
@@ -34,6 +35,13 @@ export function recordedAnswer(facts,question='',language='en') {
   if(/\bxg\b|expected goals|goals? probability|speed|injur|weather|off.ball|formation|intention|velocidad|lesi[oó]n|clima|sin bal[oó]n|formaci[oó]n|intenci[oó]n/i.test(q))return {text:es?'Estos datos no registran xG, velocidad, lesiones, clima, movimientos sin balón, formaciones ni intenciones. No se puede deducir esa información.':'These records do not include xG, speed, injuries, weather, off-ball movement, formations or intentions. That information cannot be inferred.',evidence:[facts.event.id]};
   if(/\bscore\b|marcador|resultado del partido/i.test(q))return {text:es?`Marcador registrado: ${facts.stats[0].team} ${facts.stats[0].goals}–${facts.stats[1].goals} ${facts.stats[1].team}, hasta ${facts.event.id}.`:`Recorded score: ${facts.stats[0].team} ${facts.stats[0].goals}–${facts.stats[1].goals} ${facts.stats[1].team}, through ${facts.event.id}.`,evidence:[facts.event.id]};
   if(/distance|how far|distancia|cu[aá]nto.*pase/i.test(q))return {text:facts.passDistance===null?(es?'El evento seleccionado no es un pase; no tiene una distancia de pase registrada.':'The selected event is not a pass; it has no recorded pass distance.'):(es?`Distancia estimada del pase: ${facts.passDistance} m, calculada a partir de las coordenadas sobre un campo supuesto de 105 × 68 m.`:`Estimated pass distance: ${facts.passDistance} m, calculated from coordinates on an assumed 105 × 68 m pitch.`),evidence:[facts.event.id]};
+  if(/stats?|statistics|how is .+ doing|how many .*(passes|shots|goals)|estadísticas|estadisticas|cómo va|como va|cuántos|cuantos/i.test(q)){
+    const named=(facts.playerStats||[]).filter(s=>q.toLowerCase().split(/[^a-z]+/).includes(s.player.toLowerCase()));
+    const selected=named.length===1?named[0]:/this player|selected player|este jugador/i.test(q)?facts.playerStats?.find(s=>s.player===facts.event.player):null;
+    if(!selected)return {text:es?'Indica el nombre de un jugador: '+(facts.playerStats||[]).map(s=>s.player).join(', ')+'.':'Please name one player: '+(facts.playerStats||[]).map(s=>s.player).join(', ')+'.',evidence:[facts.event.id]};
+    const stamp=Math.floor(facts.event.second/60)+':'+String(facts.event.second%60).padStart(2,'0');
+    return {text:es?`Partido sintético · hasta ${stamp}. ${selected.player} (${selected.team}): ${selected.completed} de ${selected.passes} pases completados, ${selected.shots} tiros y ${selected.goals} goles. Solo acciones registradas; no es una valoración del rendimiento completo.`:`Synthetic match · through ${stamp}. ${selected.player} (${selected.team}): ${selected.completed} of ${selected.passes} passes completed, ${selected.shots} shots and ${selected.goals} goals. Recorded actions only; this is not a rating of overall performance.`,evidence:selected.evidence.length?selected.evidence:[facts.event.id]};
+  }
   return null;
 }
 export function observedLead(event,language='en') {
