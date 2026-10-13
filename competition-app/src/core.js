@@ -94,7 +94,7 @@ export function commentaryLine(event,language='en') {
 export function createTradingMemory(eventIndex,{name='',note='',photo='',mediaKind='none'}={}) {
   const facts=interpret(generateMatch(),eventIndex);
   if(photo&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(photo)||photo.length>3000000))throw new Error('Use a local image under the card size limit.');
-  return {version:1,index:eventIndex,eventId:facts.event.id,player:facts.event.player,team:facts.event.team,second:facts.event.second,type:facts.event.type,outcome:facts.event.outcome,name:String(name).trim().slice(0,32),note:String(note).trim().slice(0,160),photo,mediaKind:photo?(mediaKind==='video-frame'?'video-frame':'photo'):'none',evidence:facts.evidence,synthetic:true};
+  return {version:1,index:eventIndex,eventId:facts.event.id,player:facts.event.player,team:facts.event.team,second:facts.event.second,type:facts.event.type,outcome:facts.event.outcome,name:Array.from(String(name).trim()).slice(0,32).join(''),note:Array.from(String(note).trim()).slice(0,160).join(''),photo,mediaKind:photo?(mediaKind==='video-frame'?'video-frame':'photo'):'none',evidence:facts.evidence,synthetic:true};
 }
 export function tradingCardSVG(memory,back=false) {
   const xml=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

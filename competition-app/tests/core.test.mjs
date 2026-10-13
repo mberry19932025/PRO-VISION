@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {generateMatch,interpret,statistics,recap,explain} from '../src/core.js';
+import {generateMatch,interpret,statistics,recap,explain,createTradingMemory,tradingCardSVG} from '../src/core.js';
 import worker from '../worker/index.js';
 test('synthetic dataset is deterministic, chronological and bounded',()=>{
  const events=generateMatch();assert.deepEqual(events,generateMatch());assert.equal(events.length,180);assert.equal(new Set(events.map(e=>e.id)).size,180);
@@ -126,4 +126,11 @@ test('player summaries use only recorded actions through the replay cursor and a
 test('schedule API labels fictional fixtures and never invokes AI',async()=>{
  let calls=0;const response=await worker.fetch(new Request('https://demo.test/api/analyze',{method:'POST',body:JSON.stringify({question:'When does Northbridge play?'})}),{PROVISION_GENERATE:()=>{calls++;throw new Error('Must not call');}});
  const answer=await response.json();assert.equal(calls,0);assert.match(answer.text,/fictional fixtures/);assert.match(answer.text,/15:00/);assert.doesNotMatch(answer.text,/Eastport/);assert.deepEqual(answer.evidence,[]);
+});
+
+test('memory card names and notes preserve complete emoji at character boundaries',()=>{
+ const memory=createTradingMemory(0,{name:'a'.repeat(31)+'⚽',note:'b'.repeat(159)+'😀'});
+ assert.doesNotThrow(()=>encodeURIComponent(tradingCardSVG(memory)));
+ assert.doesNotThrow(()=>encodeURIComponent(tradingCardSVG(memory,true)));
+ assert.ok(memory.note.endsWith('😀'));
 });

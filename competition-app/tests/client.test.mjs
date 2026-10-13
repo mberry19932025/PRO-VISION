@@ -11,7 +11,7 @@ function harness(fetch,extras={}){
  function element(){return {click(){this.clicked=true;},remove(){this.removed=true;},textContent:'',value:'',disabled:false,attrs:{},listeners:{},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;},replaceChildren(...children){this.children=children;},append(...items){this.children=[...(this.children||[]),...items];},addEventListener(k,f){this.listeners[k]=f;},querySelector(){return this.button||(this.button=element());}};}
  const get=id=>{assert.ok(pageIds.has(id),'Missing page control: '+id);if(!elements.has(id))elements.set(id,element());return elements.get(id);};
  get('language').value='en';get('favorite').value='all';get('filter').value='all';
- const context=vm.createContext({...core,document:{body:element(),getElementById:get,createElement:tag=>tag==='canvas'&&extras.testCanvas?extras.testCanvas:element(),createElementNS:element,querySelector:()=>element(),querySelectorAll:()=>[]},location:{protocol:'http:'},fetch,AbortController,URL,Blob,setTimeout,clearInterval,setInterval,...extras});
+ const context=vm.createContext({...core,document:{body:element(),getElementById:get,createElement:tag=>tag==='canvas'&&extras.testCanvas?extras.testCanvas:element(),createElementNS:element,querySelector:()=>element(),querySelectorAll:()=>[]},location:{protocol:'http:'},fetch,AbortController,URL,Blob,setTimeout,clearTimeout,clearInterval,setInterval,...extras});
  vm.runInContext(source,context);
  return {context,get,run:code=>vm.runInContext(code,context)};
 }
@@ -189,4 +189,36 @@ test('fictional matchday filters, summaries, conversation and replay navigation 
  h.get('fixture-team').value='Northbridge FC';h.get('fixture-team').listeners.change();assert.match(h.get('fixture-list').textContent,/No demo fixtures/);
  h.get('fixture-league').value='all';h.get('fixture-league').listeners.change();h.get('fixture-list').children[0].children[2].listeners.click();assert.equal(h.get('app-shell').attrs['data-screen'],'match');assert.equal(h.run('index'),0);
  await h.run("analyze('Show me today’s matches')");assert.match(h.get('provider').textContent,/DEMO FIXTURES/);assert.equal(h.get('show-why').disabled,true);assert.equal(calls,0);
+});
+
+test('card creation reveals preview and a failed video does not trap the creator',async()=>{
+ const revoked=[];class MediaURL extends URL{static createObjectURL(){return 'blob:broken-video';}static revokeObjectURL(url){revoked.push(url);}}
+ const h=harness(async()=>({ok:false}),{URL:MediaURL});let revealed=0,focused=0;
+ h.get('card-art').scrollIntoView=()=>revealed++;h.get('card-art').focus=()=>focused++;
+ h.get('card-media').files=[{type:'video/mp4',size:10}];await h.get('card-media').listeners.change();
+ h.get('card-video').listeners.error();assert.equal(h.run('cardVideoURL'),null);assert.equal(h.get('card-video').hidden,true);assert.deepEqual(revoked,['blob:broken-video']);
+ h.get('card-create').listeners.click();assert.match(h.get('card-art').innerHTML,/EV-001/);assert.equal(revealed,1);assert.equal(focused,1);assert.equal(h.get('card-png').disabled,false);
+});
+
+test('media with missing MIME type, invalid images and aborted readers recover safely',async()=>{
+ const canvas={getContext:()=>({drawImage(){}}),toDataURL:()=> 'data:image/jpeg;base64,AAAA'};
+ class Reader{readAsDataURL(){this.result='data:image/png;base64,AAAA';this.onload();}}
+ class Photo{naturalWidth=800;naturalHeight=600;set src(v){this.onload();}}
+ const h=harness(async()=>({ok:false}),{testCanvas:canvas,FileReader:Reader,Image:Photo});
+ h.get('card-media').files=[{name:'MY-PHOTO.JPG',type:'',size:10}];await h.get('card-media').listeners.change();h.get('card-create').listeners.click();assert.match(h.get('card-art').innerHTML,/data:image\/jpeg/);
+ h.run('Image=class {naturalWidth=0;naturalHeight=0;set src(v){this.onload();}}');await h.get('card-media').listeners.change();assert.match(h.get('card-status').textContent,/could not be decoded/);assert.equal(h.get('card-create').disabled,false);
+ h.run('FileReader=class {readAsDataURL(){this.onabort();}}');await h.get('card-media').listeners.change();assert.match(h.get('card-status').textContent,/could not be read/);assert.equal(h.get('card-create').disabled,false);
+});
+
+test('PNG export freezes the card face and provides a recoverable fallback on failure',async()=>{
+ const downloads=[];class MediaURL extends URL{static createObjectURL(blob){downloads.push(blob);return 'blob:png';}static revokeObjectURL(){}}
+ class Photo{set src(v){this.onload();}}
+ const canvas={getContext:()=>({drawImage(){}}),toBlob:callback=>callback(new Blob(['png'],{type:'image/png'}))};
+ const h=harness(async()=>({ok:false}),{URL:MediaURL,Image:Photo,testCanvas:canvas});h.get('card-create').listeners.click();await h.get('card-png').listeners.click();assert.equal(downloads[0].type,'image/png');assert.equal(canvas.width,1200);assert.equal(h.get('card-png').disabled,false);
+ h.run('Image=class {set src(v){this.onerror();}}');await h.get('card-png').listeners.click();assert.match(h.get('card-status').textContent,/Download SVG/);assert.equal(h.get('card-png').disabled,false);
+});
+
+test('long model replies stay within the follow-up API history limit',async()=>{
+ const requests=[];const h=harness(async(url,opts)=>{if(url==='/api/usage')return {ok:false};requests.push(JSON.parse(opts.body));return {ok:true,json:async()=>({text:'a'.repeat(2500),provider:'azure',evidence:['EV-001']})};});
+ await h.run("analyze('Why does this moment matter?')");await h.run("analyze('Explain that more simply')");assert.equal(requests[1].history[1].content.length,2000);assert.equal(h.get('insight').textContent.length,2500);
 });

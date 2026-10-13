@@ -19,7 +19,7 @@ function render(keepEvidenceTour=false) {
   cancelCommentary();
   const facts=interpret(events,index),e=facts.event,stats=facts.stats;
   $('score').textContent=stats[0].goals+' : '+stats[1].goals;$('clock').textContent=time(e.second)+' · '+(playing?'REPLAYING':'REPLAY');
-  $('pattern').textContent=facts.pattern;$('event-id').textContent=e.id+' / '+time(e.second);$('event-title').textContent=e.player+' · '+e.type.charAt(0).toUpperCase()+e.type.slice(1);$('event-detail').textContent=e.team+' / '+e.outcome;$('event-symbol').textContent=symbols[e.type];
+  $('pattern').textContent=facts.pattern;$('event-id').textContent=e.id+' / '+time(e.second);$('event-title').textContent=e.player+' · '+e.type.charAt(0).toUpperCase()+e.type.slice(1);$('event-detail').textContent=e.team+' / '+e.outcome;$('card-moment').textContent=`Selected moment: ${e.id} · ${time(e.second)} · ${e.player} · ${e.type} (${e.outcome}).`;$('event-symbol').textContent=symbols[e.type];
   $('scrub').value=index;$('event-count').textContent=(index+1)+' / '+events.length;
   $('prev').disabled=index===0;$('next').disabled=index===events.length-1;
   for(const [id,type] of [['next-shot','shot'],['next-goal','goal']])$(id).disabled=findNextHighlight(type)<0;
@@ -52,7 +52,7 @@ async function analyze(question=''){
   const scope=JSON.stringify([index,mode,$('language').value,$('favorite').value,$('favorite-player').value]);if(chatScope!==scope){chatHistory=[];chatScope=scope;}
   const userQuestion=question.trim()||'Why might this moment matter?';
   chatMessage('user',userQuestion);const reply=chatMessage('assistant','Thinking…');$('question').value='';
-  const remember=(text,provider='local')=>{reply.textContent=text;reply.sourceLabel.textContent='PRO-VISION · '+events[index].id+' · '+(provider==='azure'?'AZURE AI':provider==='foundry-local'?'LOCAL AI':'RECORDED / RULE-BASED');chatHistory.push({role:'user',content:userQuestion},{role:'assistant',content:text});chatHistory=chatHistory.slice(-4);};
+  const remember=(text,provider='local')=>{reply.textContent=text;reply.sourceLabel.textContent='PRO-VISION · '+events[index].id+' · '+(provider==='azure'?'AZURE AI':provider==='foundry-local'?'LOCAL AI':'RECORDED / RULE-BASED');chatHistory.push({role:'user',content:userQuestion.slice(0,2000)},{role:'assistant',content:text.slice(0,2000)});chatHistory=chatHistory.slice(-4);};
   const schedule=fixtureAnswer(question);if(schedule){remember(schedule.text);$('insight').textContent=schedule.text;$('provider').textContent='DEMO FIXTURES · NO AI REQUEST';showEvidence([]);$('notice').textContent='Open Matchday to browse these fictional fixtures.';return;}
   const direct=recordedAnswer(interpret(events,index),question,$('language').value);
   if(direct){remember(direct.text);$('insight').textContent=direct.text;$('provider').textContent='RECORDED FACTS · NO AI REQUEST';showEvidence(direct.evidence);$('notice').textContent='Answered directly from the event record.';return;}
@@ -91,32 +91,48 @@ updateUsage();
 
 $('compare-lenses').addEventListener('click',()=>{const facts=interpret(events,index),language=$('language').value;$('fan-lens').textContent=explain(facts,'fan','',language);$('coach-lens').textContent=explain(facts,'coach','',language);$('lens-results').hidden=false;});
 
-let selectedCard=null,cardBack=false,cardPhoto='',cardMediaKind='none',cardVideoURL=null,mediaRevision=0;
-function renderCard(){if(!selectedCard)return;const svg=tradingCardSVG(selectedCard,cardBack);$('card-art').innerHTML=svg;$('card-shirt-art').setAttribute('href','data:image/svg+xml;charset=utf-8,'+encodeURIComponent(tradingCardSVG(selectedCard)));$('card-flip').textContent=cardBack?'View front':'View back';for(const id of ['card-flip','card-download','card-replay'])$(id).disabled=false;}
-function frameImage(source,width,height){const canvas=document.createElement('canvas'),scale=Math.min(1,1024/Math.max(width,height));canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);return canvas.toDataURL('image/jpeg',.85);}
+let selectedCard=null,cardBack=false,cardPhoto='',cardMediaKind='none',cardVideoURL=null,mediaRevision=0,pngExporting=false;
+function renderCard(){if(!selectedCard)return;const svg=tradingCardSVG(selectedCard,cardBack);$('card-art').innerHTML=svg;$('card-shirt-art').setAttribute('href','data:image/svg+xml;charset=utf-8,'+encodeURIComponent(tradingCardSVG(selectedCard)));$('card-flip').textContent=cardBack?'View front':'View back';for(const id of ['card-flip','card-download','card-replay'])$(id).disabled=false;$('card-png').disabled=pngExporting;}
+function mediaReady(start,message){return new Promise((resolve,reject)=>{const timeout=setTimeout(()=>reject(new Error(message)),15000);const fail=error=>{clearTimeout(timeout);reject(error);};try{start(value=>{clearTimeout(timeout);resolve(value);},fail);}catch(error){fail(error);}});}
+function cardFeedback(message){$('card-status').textContent=message;$('card-status').scrollIntoView?.({behavior:'smooth',block:'center'});}
+function frameImage(source,width,height){if(!width||!height)throw new Error('This photo or frame could not be decoded. Try a JPEG or PNG photo.');const canvas=document.createElement('canvas'),scale=Math.min(1,1024/Math.max(width,height));canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.getContext('2d').drawImage(source,0,0,canvas.width,canvas.height);return canvas.toDataURL('image/jpeg',.85);}
 $('card-media').addEventListener('change',async()=>{
  const revision=++mediaRevision,file=$('card-media').files?.[0];cardPhoto='';cardMediaKind='none';$('card-capture').disabled=true;$('card-video').pause?.();$('card-video').hidden=true;$('card-video').removeAttribute?.('src');if(cardVideoURL){URL.revokeObjectURL(cardVideoURL);cardVideoURL=null;}
  $('card-create').disabled=false;
- if(!file)return;
+ if(!file){$('card-status').textContent='No media selected. You can still create a match memory card.';return;}
+ $('card-status').textContent='Preparing your media…';
  $('card-create').disabled=true;
  try{
-  if(['image/png','image/jpeg','image/webp'].includes(file.type)){
+  const mediaType=file.type||({png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',mp4:'video/mp4',webm:'video/webm',mov:'video/quicktime'}[file.name?.split('.').pop().toLowerCase()]||'');
+  if(['image/png','image/jpeg','image/webp'].includes(mediaType)){
    if(file.size>5*1024*1024)throw new Error('Choose a photo up to 5 MB.');
-   const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Photo could not be read.'));reader.readAsDataURL(file);});
-   const image=await new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Photo could not be decoded.'));img.src=data;});
+   const data=await mediaReady((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reader.onabort=()=>reject(new Error('Photo could not be read. Choose it again.'));reader.readAsDataURL(file);},'Photo loading timed out. Choose a JPEG or PNG again.');
+   const image=await mediaReady((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Photo could not be decoded.'));img.src=data;},'Photo decoding timed out. Choose a JPEG or PNG again.');
    if(revision!==mediaRevision)return;cardPhoto=frameImage(image,image.naturalWidth,image.naturalHeight);cardMediaKind='photo';$('card-status').textContent='Photo ready. Create your card to attach it.';
-  }else if(['video/mp4','video/webm','video/quicktime'].includes(file.type)){
+  }else if(['video/mp4','video/webm','video/quicktime'].includes(mediaType)){
    if(file.size>30*1024*1024)throw new Error('Choose a video up to 30 MB.');
    cardVideoURL=URL.createObjectURL(file);$('card-video').src=cardVideoURL;$('card-video').hidden=false;$('card-status').textContent='Play or scrub your video, pause on a frame, then select Use this video frame.';
-  }else throw new Error('Choose a PNG, JPEG, WebP, MP4, WebM or MOV file.');
- }catch(error){if(revision===mediaRevision)$('card-status').textContent=error.message;}finally{if(revision===mediaRevision)$('card-create').disabled=false;}
+  }else throw new Error('Choose a PNG, JPEG, WebP, MP4, WebM or MOV file. For an iPhone HEIC photo, export it as JPEG first.');
+ }catch(error){if(revision===mediaRevision)cardFeedback(error.message);}finally{if(revision===mediaRevision)$('card-create').disabled=false;}
 });
 $('card-video').addEventListener('loadeddata',()=>{$('card-capture').disabled=$('card-video').hidden;});
-$('card-video').addEventListener('error',()=>{$('card-capture').disabled=true;$('card-status').textContent='This browser cannot play that video. Try an MP4 or a photo.';});
-$('card-capture').addEventListener('click',()=>{try{const video=$('card-video');if(video.readyState<2||!video.videoWidth)throw new Error('Wait for a playable video frame.');video.pause();cardPhoto=frameImage(video,video.videoWidth,video.videoHeight);cardMediaKind='video-frame';$('card-status').textContent='Video frame selected. Create your card to keep this still image.';}catch(error){$('card-status').textContent=error.message;}});
-$('card-create').addEventListener('click',()=>{try{if(cardVideoURL&&!cardPhoto)throw new Error('Choose Use this video frame before creating your card.');selectedCard=createTradingMemory(index,{name:$('card-name').value,note:$('card-note').value,photo:cardPhoto,mediaKind:cardMediaKind});cardBack=false;renderCard();$('card-status').textContent=`Card created for ${selectedCard.eventId}. Download to keep it; this page does not save your personal media.`;}catch(error){$('card-status').textContent=error.message;}});
+$('card-video').addEventListener('error',()=>{if(!cardVideoURL)return;URL.revokeObjectURL(cardVideoURL);cardVideoURL=null;cardPhoto='';cardMediaKind='none';$('card-video').hidden=true;$('card-capture').disabled=true;$('card-create').disabled=false;cardFeedback('This browser cannot play that video. Try an MP4 or a photo, or create a card without media.');});
+$('card-capture').addEventListener('click',()=>{try{const video=$('card-video');if(video.readyState<2||!video.videoWidth)throw new Error('Wait for a playable video frame.');video.pause();cardPhoto=frameImage(video,video.videoWidth,video.videoHeight);cardMediaKind='video-frame';$('card-status').textContent='Video frame selected. Create your card to keep this still image.';}catch(error){cardFeedback(error.message);}});
+$('card-create').addEventListener('click',()=>{try{if(cardVideoURL&&!cardPhoto)throw new Error('Choose Use this video frame before creating your card.');const memory=createTradingMemory(index,{name:$('card-name').value,note:$('card-note').value,photo:cardPhoto,mediaKind:cardMediaKind});selectedCard=memory;cardBack=false;renderCard();$('card-art').focus?.({preventScroll:true});$('card-art').scrollIntoView?.({behavior:'smooth',block:'start'});$('card-status').textContent=`Card created for ${selectedCard.eventId}. Download to keep it; this page does not save your personal media.`;}catch(error){cardFeedback(error.message);}});
 $('card-flip').addEventListener('click',()=>{if(selectedCard){cardBack=!cardBack;renderCard();}});
 $('card-download').addEventListener('click',()=>{if(!selectedCard)return;downloadFile(new Blob([tradingCardSVG(selectedCard,cardBack)],{type:'image/svg+xml'}),`pro-vision-card-${selectedCard.eventId}-${cardBack?'back':'front'}.svg`);});
+$('card-png').addEventListener('click',async()=>{
+ if(!selectedCard||pngExporting)return;pngExporting=true;
+ const memory=selectedCard,back=cardBack,button=$('card-png');button.disabled=true;button.textContent='Preparing PNG…';
+ try{
+  const svg=tradingCardSVG(memory,back);
+  const image=await mediaReady((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('PNG export could not load. Use Download SVG instead.'));img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);},'PNG export timed out. Use Download SVG instead.');
+  const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1680;canvas.getContext('2d').drawImage(image,0,0,1200,1680);
+  const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG export unavailable. Use Download SVG instead.')),'image/png'));
+  downloadFile(blob,`pro-vision-card-${memory.eventId}-${back?'back':'front'}.png`);
+  cardFeedback('PNG download started. On a phone, find it in Downloads or Files; your browser may show a save prompt.');
+ }catch(error){cardFeedback(error.message);}finally{pngExporting=false;button.disabled=false;button.textContent='Download PNG';}
+});
 $('card-replay').addEventListener('click',()=>{if(!selectedCard)return;stop();index=selectedCard.index;selectScreen('match');render();$('pitch').scrollIntoView?.({behavior:'smooth',block:'center'});$('card-status').textContent='Simulated tap reopened '+selectedCard.eventId+'. No physical tag was scanned.';});
 $('card-shirt-color').addEventListener('change',()=>{const color=$('card-shirt-color').value;$('card-shirt-body').setAttribute('fill',['#061225','#f1f5f9','#e8a28b'].includes(color)?color:'#061225');});
 
